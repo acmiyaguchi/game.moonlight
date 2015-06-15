@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addon
+  id="game.moonlight"
+  version="1.0.0"
+  name="Moonlight Client"
+  provider-name="acmiyaguchi">
+  <requires>
+    <c-pluff version="0.1"/>
+    <import addon="game.libretro" version="1.0.0"/>
+  </requires>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">Kodi Moonlight Client</summary>
+    <description lang="en">Moonlight Client for Kodi.</description>
+    <platform>all</platform>
+    <noicon>true</noicon>
+    <nofanart>true</nofanart>
+  </extension>
+</addon>
