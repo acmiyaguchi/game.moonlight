@@ -17,7 +17,7 @@ include_directories(${INCLUDES}
 
 list(APPEND DEPLIBS ${kodiplatform_LIBRARIES} ${platform_LIBRARIES})
 
-set(LIBRETRO_SOURCES src/addon.cpp)
+set(MOONLIGHT_SOURCES src/addon.cpp)
 
 build_addon(game.moonlight MOONLIGHT DEPLIBS)
 

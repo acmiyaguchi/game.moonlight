@@ -23,44 +23,33 @@
 
 #include <vector>
 
+using namespace ADDON;
+
+#if !defined(SAFE_DELETE)
+  #define SAFE_DELETE(x)  do { delete (x); (x) = NULL; } while (0)
+#endif
+
+CHelper_libXBMC_addon*  XBMC;
+
 extern "C"
 {
 
-ADDON::CHelper_libXBMC_addon*      FRONTEND;
-
-
 ADDON_STATUS ADDON_Create(void* callbacks, void* props)
 {
-  PERIPHERAL_PROPERTIES* peripheralProps = static_cast<PERIPHERAL_PROPERTIES*>(props);
-
   try
   {
-    if (!callbacks || !peripheralProps)
+    if (!callbacks || !props)
       throw ADDON_STATUS_UNKNOWN;
 
-    FRONTEND = new ADDON::CHelper_libXBMC_addon;
-    if (!FRONTEND || !FRONTEND->RegisterMe(callbacks))
-      throw ADDON_STATUS_PERMANENT_FAILURE;
-
-    PERIPHERAL = new ADDON::CHelper_libKODI_peripheral;
-    if (!PERIPHERAL || !PERIPHERAL->RegisterMe(callbacks))
+    XBMC = new ADDON::CHelper_libXBMC_addon;
+    if (!XBMC || !XBMC->RegisterMe(callbacks))
       throw ADDON_STATUS_PERMANENT_FAILURE;
   }
   catch (const ADDON_STATUS& status)
   {
-    SAFE_DELETE(PERIPHERAL);
-    SAFE_DELETE(FRONTEND);
+    SAFE_DELETE(XBMC);
     return status;
   }
-
-  CLog::Get().SetPipe(new CLogAddon(FRONTEND));
-
-  SCANNER = new CPeripheralScanner(PERIPHERAL);
-  if (!CJoystickManager::Get().Initialize(SCANNER))
-    return ADDON_STATUS_PERMANENT_FAILURE;
-
-  if (!CDevices::Get().Initialize(*peripheralProps))
-    return ADDON_STATUS_PERMANENT_FAILURE;
 
   return ADDON_GetStatus();
 }
@@ -71,25 +60,12 @@ void ADDON_Stop()
 
 void ADDON_Destroy()
 {
-  CJoystickManager::Get().Deinitialize();
-  CDevices::Get().Deinitialize();
-
-  CLog::Get().SetType(SYS_LOG_TYPE_CONSOLE);
-
-  SAFE_DELETE(PERIPHERAL);
-  SAFE_DELETE(FRONTEND);
-  SAFE_DELETE(SCANNER);
+  SAFE_DELETE(XBMC);
 }
 
 ADDON_STATUS ADDON_GetStatus()
 {
-  if (!FRONTEND || !PERIPHERAL)
-    return ADDON_STATUS_UNKNOWN;
-
-  if (!CSettings::Get().IsInitialized())
-    return ADDON_STATUS_NEED_SETTINGS;
-
-  return ADDON_STATUS_OK;
+  return XBMC ? ADDON_STATUS_OK : ADDON_STATUS_UNKNOWN;
 }
 
 bool ADDON_HasSettings()
@@ -104,8 +80,8 @@ unsigned int ADDON_GetSettings(ADDON_StructSetting ***sSet)
 
 ADDON_STATUS ADDON_SetSetting(const char *settingName, const void *settingValue)
 {
-  if (settingName && settingValue)
-    CSettings::Get().SetSetting(settingName, settingValue);
+  if (!settingName || !settingValue)
+    return ADDON_STATUS_UNKNOWN;
 
   return ADDON_STATUS_OK;
 }
