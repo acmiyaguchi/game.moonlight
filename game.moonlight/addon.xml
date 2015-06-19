@@ -5,7 +5,7 @@
   name="Moonlight Client"
   provider-name="acmiyaguchi">
   <requires>
-    <import addon="game.libretro" version="1.0.0"/>
+    <import addon="kodi.game" version="1.0.0"/>
   </requires>
   <extension point="kodi.gameclient"
     library_android="game.moonlight.so"

@@ -19,7 +19,9 @@
  */
 
 #include "kodi/libXBMC_addon.h"
+#include "kodi/libKODI_game.h"
 #include "kodi/xbmc_addon_dll.h"
+#include "kodi/kodi_game_dll.h"
 
 #include <vector>
 
@@ -29,7 +31,8 @@ using namespace ADDON;
   #define SAFE_DELETE(x)  do { delete (x); (x) = NULL; } while (0)
 #endif
 
-CHelper_libXBMC_addon*  XBMC;
+CHelper_libXBMC_addon*  XBMC      = NULL;
+CHelper_libKODI_game*   FRONTEND  = NULL;
 
 extern "C"
 {
@@ -44,10 +47,15 @@ ADDON_STATUS ADDON_Create(void* callbacks, void* props)
     XBMC = new ADDON::CHelper_libXBMC_addon;
     if (!XBMC || !XBMC->RegisterMe(callbacks))
       throw ADDON_STATUS_PERMANENT_FAILURE;
+
+    FRONTEND = new CHelper_libKODI_game;
+    if (!FRONTEND || !FRONTEND->RegisterMe(callbacks))
+      throw ADDON_STATUS_PERMANENT_FAILURE;
   }
   catch (const ADDON_STATUS& status)
   {
     SAFE_DELETE(XBMC);
+    SAFE_DELETE(FRONTEND);
     return status;
   }
 
@@ -61,6 +69,7 @@ void ADDON_Stop()
 void ADDON_Destroy()
 {
   SAFE_DELETE(XBMC);
+  SAFE_DELETE(FRONTEND);
 }
 
 ADDON_STATUS ADDON_GetStatus()
