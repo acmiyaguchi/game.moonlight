@@ -103,4 +103,173 @@ void ADDON_Announce(const char *flag, const char *sender, const char *message, c
 {
 }
 
+const char* GetGameAPIVersion(void)
+{
+  return GAME_API_VERSION;
+}
+
+const char* GetMininumGameAPIVersion(void)
+{
+  return GAME_MIN_API_VERSION;
+}
+
+GAME_ERROR LoadGame(const char* url)
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR LoadGameSpecial(GAME_TYPE type, const char** urls, size_t num_urls)
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR UnloadGame(void)
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR Run(void)
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR Reset(void)
+{
+  return GAME_ERROR_FAILED;
+}
+
+void ControllerConnected(unsigned int port, bool connected, const game_controller* connected_controller)
+{
+}
+
+bool InputEvent(unsigned int port, const game_input_event* event)
+{
+  return false;
+}
+
+GAME_ERROR GetSystemAVInfo(game_system_av_info *info)
+{
+  return GAME_ERROR_FAILED;
+}
+
+size_t SerializeSize(void)
+{
+  return 0;
+}
+
+GAME_ERROR Serialize(void *data, size_t size)
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR Deserialize(const void *data, size_t size)
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR CheatReset(void)
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR CheatSet(unsigned index, bool enabled, const char *code)
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_REGION GetRegion(void)
+{
+  return GAME_REGION_NTSC;
+}
+
+void* GetMemoryData(GAME_MEMORY id)
+{
+  return NULL;
+}
+
+size_t GetMemorySize(GAME_MEMORY id)
+{
+  return 0;
+}
+
+GAME_ERROR DiskSetEjectState(GAME_EJECT_STATE ejected)
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_EJECT_STATE DiskGetEjectState()
+{
+  return GAME_NOT_EJECTED;
+}
+
+unsigned DiskGetImageIndex()
+{
+  return 0;
+}
+
+GAME_ERROR DiskSetImageIndex(unsigned index)
+{
+  return GAME_ERROR_FAILED;
+}
+
+unsigned DiskGetNumImages()
+{
+  return 0;
+}
+
+GAME_ERROR DiskReplaceImageIndex(unsigned index, const char* url)
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR DiskAddImageIndex()
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR HwContextReset()
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR HwContextDestroy()
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR AudioAvailable()
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR AudioSetState(bool enabled)
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR FrameTimeNotify(game_usec_t usec)
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR CameraInitialized()
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR CameraDeinitialized()
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR CameraFrameRawBuffer(const uint32_t *buffer, unsigned width, unsigned height, size_t pitch)
+{
+  return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR CameraFrameOpenglTexture(unsigned texture_id, unsigned texture_target, const float *affine)
+{
+  return GAME_ERROR_FAILED;
+}
+
 } // extern "C"
