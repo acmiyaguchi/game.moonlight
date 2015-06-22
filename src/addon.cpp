@@ -34,6 +34,9 @@ using namespace ADDON;
 CHelper_libXBMC_addon*  KODI      = NULL;
 CHelper_libKODI_game*   FRONTEND  = NULL;
 
+const size_t m_width = 800;
+const size_t m_height = 600;
+
 extern "C"
 {
 
@@ -115,7 +118,7 @@ const char* GetMininumGameAPIVersion(void)
 
 GAME_ERROR LoadGame(const char* url)
 {
-  return GAME_ERROR_FAILED;
+  return GAME_ERROR_NO_ERROR;
 }
 
 GAME_ERROR LoadGameSpecial(GAME_TYPE type, const char** urls, size_t num_urls)
@@ -130,6 +133,15 @@ GAME_ERROR UnloadGame(void)
 
 GAME_ERROR Run(void)
 {
+  bool result;
+  size_t buf_len = m_width * m_height;
+  uint8_t data[buf_len*2];
+  memset((void*)data, 0, buf_len);
+
+  result = FRONTEND->VideoFrame(GAME_RENDER_FMT_0RGB1555, m_width, m_height, static_cast<const uint8_t*>(data));
+
+  if(result)
+    return GAME_ERROR_NO_ERROR;
   return GAME_ERROR_FAILED;
 }
 
@@ -149,7 +161,15 @@ bool InputEvent(unsigned int port, const game_input_event* event)
 
 GAME_ERROR GetSystemAVInfo(game_system_av_info *info)
 {
-  return GAME_ERROR_FAILED;
+  info->geometry.base_width   = m_width;
+  info->geometry.base_height  = m_height;
+  info->geometry.max_width    = m_width;
+  info->geometry.max_height   = m_height;
+  info->geometry.aspect_ratio = 0.0;
+  info->timing.fps            = 60.0;
+  info->timing.sample_rate    = 0.0;
+
+  return GAME_ERROR_NO_ERROR;
 }
 
 size_t SerializeSize(void)
