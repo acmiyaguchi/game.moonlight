@@ -31,7 +31,7 @@ using namespace ADDON;
   #define SAFE_DELETE(x)  do { delete (x); (x) = NULL; } while (0)
 #endif
 
-CHelper_libXBMC_addon*  XBMC      = NULL;
+CHelper_libXBMC_addon*  KODI      = NULL;
 CHelper_libKODI_game*   FRONTEND  = NULL;
 
 extern "C"
@@ -44,8 +44,8 @@ ADDON_STATUS ADDON_Create(void* callbacks, void* props)
     if (!callbacks || !props)
       throw ADDON_STATUS_UNKNOWN;
 
-    XBMC = new ADDON::CHelper_libXBMC_addon;
-    if (!XBMC || !XBMC->RegisterMe(callbacks))
+    KODI = new ADDON::CHelper_libXBMC_addon;
+    if (!KODI || !KODI->RegisterMe(callbacks))
       throw ADDON_STATUS_PERMANENT_FAILURE;
 
     FRONTEND = new CHelper_libKODI_game;
@@ -54,7 +54,7 @@ ADDON_STATUS ADDON_Create(void* callbacks, void* props)
   }
   catch (const ADDON_STATUS& status)
   {
-    SAFE_DELETE(XBMC);
+    SAFE_DELETE(KODI);
     SAFE_DELETE(FRONTEND);
     return status;
   }
@@ -68,13 +68,13 @@ void ADDON_Stop()
 
 void ADDON_Destroy()
 {
-  SAFE_DELETE(XBMC);
+  SAFE_DELETE(KODI);
   SAFE_DELETE(FRONTEND);
 }
 
 ADDON_STATUS ADDON_GetStatus()
 {
-  return XBMC ? ADDON_STATUS_OK : ADDON_STATUS_UNKNOWN;
+  return KODI ? ADDON_STATUS_OK : ADDON_STATUS_UNKNOWN;
 }
 
 bool ADDON_HasSettings()
