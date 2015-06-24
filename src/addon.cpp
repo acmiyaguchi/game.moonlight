@@ -54,6 +54,8 @@ ADDON_STATUS ADDON_Create(void* callbacks, void* props)
     FRONTEND = new CHelper_libKODI_game;
     if (!FRONTEND || !FRONTEND->RegisterMe(callbacks))
       throw ADDON_STATUS_PERMANENT_FAILURE;
+
+
   }
   catch (const ADDON_STATUS& status)
   {
@@ -118,12 +120,18 @@ const char* GetMininumGameAPIVersion(void)
 
 GAME_ERROR LoadGame(const char* url)
 {
-  return GAME_ERROR_NO_ERROR;
+  
+  return GAME_ERROR_FAILED;
 }
 
 GAME_ERROR LoadGameSpecial(GAME_TYPE type, const char** urls, size_t num_urls)
 {
   return GAME_ERROR_FAILED;
+}
+
+GAME_ERROR LoadStandalone(void)
+{
+  return GAME_ERROR_NO_ERROR;
 }
 
 GAME_ERROR UnloadGame(void)

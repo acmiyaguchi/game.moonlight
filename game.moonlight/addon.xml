@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon
   id="game.moonlight"
-  version="0.0.1"
+  version="0.0.2"
   name="Moonlight Client"
   provider-name="acmiyaguchi">
   <requires>
@@ -13,6 +13,10 @@
     library_osx="game.moonlight.dylib"
     library_windx="game.moonlight.dll"
     library_wingl="game.moonlight.dll">
+    <platforms></platforms>
+    <extensions></extensions>
+    <supports_vfs>true</supports_vfs>
+    <supports_no_game>true</supports_no_game>
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary lang="en">Kodi Moonlight Client</summary>
