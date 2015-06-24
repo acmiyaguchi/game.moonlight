@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+	<category label="6">
+   	<setting id="host_ip" type="text" label="30000" default="0.0.0.0"/>
+	</category>
+</settings>
