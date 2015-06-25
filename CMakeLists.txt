@@ -29,7 +29,8 @@ list(APPEND DEPLIBS ${kodiplatform_LIBRARIES}
 					${CURL_LIBRARIES} 
 					moonlight)
 
-set(MOONLIGHT_SOURCES src/addon.cpp)
+set(MOONLIGHT_SOURCES src/addon.cpp
+                      src/MoonlightClient.cpp)
 
 build_addon(game.moonlight MOONLIGHT DEPLIBS)
 

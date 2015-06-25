@@ -22,6 +22,7 @@
 #include "kodi/libKODI_game.h"
 #include "kodi/xbmc_addon_dll.h"
 #include "kodi/kodi_game_dll.h"
+#include "MoonlightClient.h"
 
 #include <vector>
 
@@ -33,6 +34,7 @@ using namespace ADDON;
 
 CHelper_libXBMC_addon*  KODI      = NULL;
 CHelper_libKODI_game*   FRONTEND  = NULL;
+CMoonlightClient*       MOONLIGHT = NULL;
 
 const size_t m_width = 800;
 const size_t m_height = 600;
@@ -55,12 +57,14 @@ ADDON_STATUS ADDON_Create(void* callbacks, void* props)
     if (!FRONTEND || !FRONTEND->RegisterMe(callbacks))
       throw ADDON_STATUS_PERMANENT_FAILURE;
 
+    MOONLIGHT = new CMoonlightClient;
 
   }
   catch (const ADDON_STATUS& status)
   {
     SAFE_DELETE(KODI);
     SAFE_DELETE(FRONTEND);
+    SAFE_DELETE(MOONLIGHT);
     return status;
   }
 
@@ -69,12 +73,14 @@ ADDON_STATUS ADDON_Create(void* callbacks, void* props)
 
 void ADDON_Stop()
 {
+  MOONLIGHT->stop();
 }
 
 void ADDON_Destroy()
 {
   SAFE_DELETE(KODI);
   SAFE_DELETE(FRONTEND);
+  SAFE_DELETE(MOONLIGHT);
 }
 
 ADDON_STATUS ADDON_GetStatus()
@@ -131,6 +137,7 @@ GAME_ERROR LoadGameSpecial(GAME_TYPE type, const char** urls, size_t num_urls)
 
 GAME_ERROR LoadStandalone(void)
 {
+  MOONLIGHT->start();
   return GAME_ERROR_NO_ERROR;
 }
 
