@@ -38,7 +38,7 @@ namespace MOONLIGHT
 
     PairState pair(std::string pin);
 
-    std::string openHTTPConnection(std::string url, bool enableReadTimeout);
+    std::string openHttpConnection(std::string url, bool enableReadTimeout);
 
     std::string baseUrlHttps;
   };

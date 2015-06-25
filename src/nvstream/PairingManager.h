@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <openssl/x509.h>
 
 namespace MOONLIGHT
 {
@@ -42,6 +43,6 @@ namespace MOONLIGHT
     std::vector<unsigned char> hexToBytes(std::string s);
     NvHTTP* m_http;
     unsigned char m_cert_bytes[4096];
-
+    X509* m_cert;
   };
 }

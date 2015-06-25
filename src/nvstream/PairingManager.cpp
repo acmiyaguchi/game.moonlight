@@ -27,7 +27,6 @@
 #include <openssl/aes.h>
 #include <openssl/rand.h>
 #include <openssl/evp.h>
-#include <openssl/x509.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
 
@@ -37,6 +36,7 @@ using namespace MOONLIGHT;
 PairingManager::PairingManager(NvHTTP* http) :
     m_http(http)
 {
+  m_cert = NULL;
 }
 
 PairState PairingManager::pair(string uid, string pin)
@@ -61,13 +61,13 @@ PairState PairingManager::pair(string uid, string pin)
       << "&devicename=roth&updateState=1&phrase=getservercert&salt="
       << bytesToHex(salt_data, 16) << "&clientcert="
       << bytesToHex(m_cert_bytes, 4096);
-  string get_cert = m_http->openHTTPConnection(url.str(), false);
+  string get_cert = m_http->openHttpConnection(url.str(), false);
   url.str("");
 
   if (m_http->getXmlString(get_cert, "paired") != "1")
   {
     url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
-    m_http->openHTTPConnection(url.str(), true);
+    m_http->openHttpConnection(url.str(), true);
     return PairState::FAILED;
   }
 
@@ -81,17 +81,58 @@ PairState PairingManager::pair(string uid, string pin)
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&clientchallenge="
       << bytesToHex(challenge_encrypted, 16);
-  string challenge_resp = m_http->openHTTPConnection(url.str(), true);
+  string challenge_resp = m_http->openHttpConnection(url.str(), true);
   url.str("");
 
   if (m_http->getXmlString(challenge_resp, "paired") != "1")
   {
     url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
-    m_http->openHTTPConnection(url.str(), true);
+    m_http->openHttpConnection(url.str(), true);
     return PairState::FAILED;
   }
 
   // decode the server response and subsequent challenge
+  vector<unsigned char> challenge_resp_encoded = hexToBytes(
+      m_http->getXmlString(challenge_resp, "challengeresponse"));
+  vector<unsigned char> challenge_resp_decoded(challenge_resp_encoded.size());
+
+  for (int i = 0; i < 48; i += 16)
+  {
+    AES_decrypt(&challenge_resp_encoded[i], &challenge_resp_decoded[i],
+        &aes_key);
+  }
+
+  // compute the challenge response hash
+  unsigned char client_secret[16];
+  RAND_bytes(client_secret, 16);
+
+  unsigned char server_challenge[16 + 256 + 16];
+  unsigned char challenge_resp_hash[32];
+  unsigned char challenge_resp_encrypted[32];
+  memcpy(server_challenge, &challenge_resp_decoded[0] + 20, 16);
+  memcpy(server_challenge + 16, m_cert->signature->data, 256);
+  memcpy(server_challenge + 16 + 256, client_secret, 16);
+  SHA1(server_challenge, 16 + 256 + 16, challenge_resp_hash);
+
+  for (int i = 0; i < 32; i += 16)
+  {
+    AES_encrypt(&challenge_resp_hash[i], &challenge_resp_encrypted[i],
+        &aes_key);
+  }
+
+  url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
+      << "&devicename=roth&updateState=1&serverchallengeresp="
+      << bytesToHex(challenge_resp_encrypted, 32);
+  string secret_resp = m_http->openHttpConnection(url.str(), true);
+  url.str("");
+  if(m_http->getXmlString(secret_resp, "paired") != "1")
+  {
+    url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
+    m_http->openHttpConnection(url.str(), true);
+    return PairState::FAILED;
+  }
+
+  // get the servers signed secret
 
   return PairState::FAILED;
 }
@@ -115,10 +156,10 @@ string PairingManager::bytesToHex(unsigned char* in, unsigned len)
 vector<unsigned char> hexToBytes(string s)
 {
   int len = s.length();
-  vector<unsigned char> data(len/2);
-  for (int i = 0; i < len; i+=2)
+  vector<unsigned char> data(len / 2);
+  for (int i = 0; i < len; i += 2)
   {
-    data[i / 2] = ((s[i] - '0') << 4) | (s[i+1] - '0');
+    data[i / 2] = ((s[i] - '0') << 4) | (s[i + 1] - '0');
   }
   return data;
 }

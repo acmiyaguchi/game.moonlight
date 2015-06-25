@@ -47,7 +47,7 @@ PairState NvHTTP::pair(string pin)
   return PairState::FAILED;
 }
 
-std::string NvHTTP::openHTTPConnection(string url, bool enableReadTimeout)
+std::string NvHTTP::openHttpConnection(string url, bool enableReadTimeout)
 {
   return "";
 }
