@@ -19,6 +19,8 @@
  */
 #include "NvHTTP.h"
 
+using namespace MOONLIGHT;
+
 std::string NvHTTP::getServerInfo(std::string uid)
 {
   return "";

@@ -21,22 +21,25 @@
 
 #include <string>
 
-enum class PairState
+namespace MOONLIGHT
 {
-  NOT_PAIRED, PAIRED, PIN_WRONG, FAILED
-};
+  enum class PairState
+  {
+    NOT_PAIRED, PAIRED, PIN_WRONG, FAILED
+  };
 
-class NvHTTP;
+  class NvHTTP;
 
-class PairingManager
-{
-public:
-  PairingManager(NvHTTP* http);
-  PairState pair(std::string uid, std::string pin);
-  PairState getPairState(std::string serverInfo);
-private:
-  std::string bytesToHex(unsigned char* in, unsigned len);
-  NvHTTP* m_http;
-  unsigned char m_cert_bytes[4096];
+  class PairingManager
+  {
+  public:
+    PairingManager(NvHTTP* http);
+    PairState pair(std::string uid, std::string pin);
+    PairState getPairState(std::string serverInfo);
+  private:
+    std::string bytesToHex(unsigned char* in, unsigned len);
+    NvHTTP* m_http;
+    unsigned char m_cert_bytes[4096];
 
-};
+  };
+}

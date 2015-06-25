@@ -21,16 +21,19 @@
 
 #include "Preferences.h"
 
-class PreferencesManager
+namespace MOONLIGHT
 {
-public:
-  void writePreferences(Preferences prefs)
+  class PreferencesManager
   {
-  }
-  bool hasExistingPreferences()
-  {
-  }
-  Preferences getPreferences()
-  {
-  }
-};
+  public:
+    void writePreferences(Preferences prefs)
+    {
+    }
+    bool hasExistingPreferences()
+    {
+    }
+    Preferences getPreferences()
+    {
+    }
+  };
+}

@@ -22,18 +22,22 @@
 #include "PairingManager.h"
 #include <string>
 
-class NvHTTP
+
+namespace MOONLIGHT
 {
-public:
-  std::string getServerInfo(std::string uid);
+  class NvHTTP
+  {
+  public:
+    std::string getServerInfo(std::string uid);
 
-  PairState getPairState(std::string serverInfo);
+    PairState getPairState(std::string serverInfo);
 
-  int getCurrentGame(std::string serverInfo);
+    int getCurrentGame(std::string serverInfo);
 
-  PairState pair(std::string pin);
+    PairState pair(std::string pin);
 
-  std::string openHTTPConnection(std::string url, bool enableReadTimeout);
+    std::string openHTTPConnection(std::string url, bool enableReadTimeout);
 
-  std::string baseUrlHttps;
-};
+    std::string baseUrlHttps;
+  };
+}

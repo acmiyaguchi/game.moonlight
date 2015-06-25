@@ -31,6 +31,7 @@
 #include <openssl/err.h>
 
 using namespace std;
+using namespace MOONLIGHT;
 
 PairingManager::PairingManager(NvHTTP* http) :
     m_http(http)

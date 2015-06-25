@@ -23,6 +23,7 @@
 #include <ctime>
 
 using namespace std;
+using namespace MOONLIGHT;
 
 Preferences::Preferences()
 {

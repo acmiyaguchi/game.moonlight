@@ -19,6 +19,8 @@
  */
 #include "Resolution.h"
 
+using namespace MOONLIGHT;
+
 Resolution::Resolution(ResolutionType type)
 {
   switch (type)
