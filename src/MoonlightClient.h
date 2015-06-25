@@ -19,13 +19,12 @@
  */
 #pragma once
 
- #include "Limelight.h"
-
+#include "Limelight.h"
 
 class CMoonlightClient
 {
 public:
-	void start();
-	void stop();
-	void pair();
+  void start();
+  void stop();
+  void pair();
 };

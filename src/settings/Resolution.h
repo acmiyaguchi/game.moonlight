@@ -19,36 +19,37 @@
  */
 #pragma once
 
-enum ResolutionType {
-	RES_720_30, 
-	RES_720_60, 
-	RES_768_30, 
-	RES_768_60,
-	RES_900_30, 
-	RES_900_60,
-	RES_1050_30, 
-	RES_1050_60,
-	RES_1080_30, 
-	RES_1080_60
+enum ResolutionType
+{
+  RES_720_30,
+  RES_720_60,
+  RES_768_30,
+  RES_768_60,
+  RES_900_30,
+  RES_900_60,
+  RES_1050_30,
+  RES_1050_60,
+  RES_1080_30,
+  RES_1080_60
 };
 
 class Resolution
 {
 public:
-	Resolution(ResolutionType type);
+  Resolution(ResolutionType type);
 
-	int getWidth() const;
+  int getWidth() const;
 
-	int getHeight() const;
+  int getHeight() const;
 
-	int getFramerate() const;
+  int getFramerate() const;
 
-	int getBitrate() const;
-	
+  int getBitrate() const;
+
 private:
-	void setResolution(int width, int height, int framerate, int bitrate);
-	int m_width;
-	int m_height;
-	int m_framerate;
-	int m_bitrate;
+  void setResolution(int width, int height, int framerate, int bitrate);
+  int m_width;
+  int m_height;
+  int m_framerate;
+  int m_bitrate;
 };

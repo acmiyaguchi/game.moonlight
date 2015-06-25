@@ -21,11 +21,16 @@
 
 #include "Preferences.h"
 
- 
 class PreferencesManager
 {
 public:
-	void writePreferences(Preferences prefs) {}
-	bool hasExistingPreferences() {}
-	Preferences getPreferences() {}
+  void writePreferences(Preferences prefs)
+  {
+  }
+  bool hasExistingPreferences()
+  {
+  }
+  Preferences getPreferences()
+  {
+  }
 };

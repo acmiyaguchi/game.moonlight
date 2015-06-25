@@ -25,36 +25,36 @@
 class Preferences
 {
 public:
-	Preferences();
+  Preferences();
 
-	Preferences(ResolutionType res, bool fullscreen);
+  Preferences(ResolutionType res, bool fullscreen);
 
-	virtual ~Preferences();
+  virtual ~Preferences();
 
-	std::string getHost() const;
+  std::string getHost() const;
 
-	void setHost(char* host);
+  void setHost(char* host);
 
-	Resolution getResolution() const;
+  Resolution getResolution() const;
 
-	int getBitrate() const;
+  int getBitrate() const;
 
-	bool getFullscreen() const;
+  bool getFullscreen() const;
 
-	void setResolution(ResolutionType res);
+  void setResolution(ResolutionType res);
 
-	void setBitrate(int bitrate);
+  void setBitrate(int bitrate);
 
-	void setFullscreen(bool fullscreen);
+  void setFullscreen(bool fullscreen);
 
-	const std::string getUniqueId() const;
+  const std::string getUniqueId() const;
 
 private:
-	void init(ResolutionType res, bool fullscreen);
+  void init(ResolutionType res, bool fullscreen);
 
-	Resolution* m_resolution;
-	int m_bitrate;
-	bool m_fullscreen;
-	std::string m_host;
-	std::string m_uid;
+  Resolution* m_resolution;
+  int m_bitrate;
+  bool m_fullscreen;
+  std::string m_host;
+  std::string m_uid;
 };

@@ -17,31 +17,29 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
- #include "NvHTTP.h"
+#include "NvHTTP.h"
 
 std::string NvHTTP::getServerInfo(std::string uid)
 {
-	return "";
+  return "";
 }
 
 PairState NvHTTP::getPairState(std::string serverInfo)
 {
-	return PairState::FAILED;
+  return PairState::FAILED;
 }
 
 int NvHTTP::getCurrentGame(std::string serverInfo)
 {
-	return -1;
+  return -1;
 }
 
 PairState NvHTTP::pair(std::string pin)
 {
-	return PairState::FAILED;
+  return PairState::FAILED;
 }
 
 std::string NvHTTP::openHTTPConnection(std::string url, bool enableReadTimeout)
 {
-	return "";
+  return "";
 }
-
-

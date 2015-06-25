@@ -17,7 +17,6 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
-
 #include "kodi/libXBMC_addon.h"
 #include "kodi/libKODI_game.h"
 #include "kodi/xbmc_addon_dll.h"
@@ -29,12 +28,12 @@
 using namespace ADDON;
 
 #if !defined(SAFE_DELETE)
-  #define SAFE_DELETE(x)  do { delete (x); (x) = NULL; } while (0)
+#define SAFE_DELETE(x)  do { delete (x); (x) = NULL; } while (0)
 #endif
 
-CHelper_libXBMC_addon*  KODI      = NULL;
-CHelper_libKODI_game*   FRONTEND  = NULL;
-CMoonlightClient*       MOONLIGHT = NULL;
+CHelper_libXBMC_addon* KODI = NULL;
+CHelper_libKODI_game* FRONTEND = NULL;
+CMoonlightClient* MOONLIGHT = NULL;
 
 const size_t m_width = 800;
 const size_t m_height = 600;
@@ -59,8 +58,7 @@ ADDON_STATUS ADDON_Create(void* callbacks, void* props)
 
     MOONLIGHT = new CMoonlightClient;
 
-  }
-  catch (const ADDON_STATUS& status)
+  } catch (const ADDON_STATUS& status)
   {
     SAFE_DELETE(KODI);
     SAFE_DELETE(FRONTEND);
@@ -110,7 +108,8 @@ void ADDON_FreeSettings()
 {
 }
 
-void ADDON_Announce(const char *flag, const char *sender, const char *message, const void *data)
+void ADDON_Announce(const char *flag, const char *sender, const char *message,
+    const void *data)
 {
 }
 
@@ -126,7 +125,7 @@ const char* GetMininumGameAPIVersion(void)
 
 GAME_ERROR LoadGame(const char* url)
 {
-  
+
   return GAME_ERROR_FAILED;
 }
 
@@ -150,12 +149,13 @@ GAME_ERROR Run(void)
 {
   bool result;
   size_t buf_len = m_width * m_height;
-  uint8_t data[buf_len*2];
-  memset((void*)data, 0, buf_len);
+  uint8_t data[buf_len * 2];
+  memset((void*) data, 0, buf_len);
 
-  result = FRONTEND->VideoFrame(GAME_RENDER_FMT_0RGB1555, m_width, m_height, static_cast<const uint8_t*>(data));
+  result = FRONTEND->VideoFrame(GAME_RENDER_FMT_0RGB1555, m_width, m_height,
+      static_cast<const uint8_t*>(data));
 
-  if(result)
+  if (result)
     return GAME_ERROR_NO_ERROR;
   return GAME_ERROR_FAILED;
 }
@@ -165,7 +165,8 @@ GAME_ERROR Reset(void)
   return GAME_ERROR_FAILED;
 }
 
-void ControllerConnected(unsigned int port, bool connected, const game_controller* connected_controller)
+void ControllerConnected(unsigned int port, bool connected,
+    const game_controller* connected_controller)
 {
 }
 
@@ -176,13 +177,13 @@ bool InputEvent(unsigned int port, const game_input_event* event)
 
 GAME_ERROR GetSystemAVInfo(game_system_av_info *info)
 {
-  info->geometry.base_width   = m_width;
-  info->geometry.base_height  = m_height;
-  info->geometry.max_width    = m_width;
-  info->geometry.max_height   = m_height;
+  info->geometry.base_width = m_width;
+  info->geometry.base_height = m_height;
+  info->geometry.max_width = m_width;
+  info->geometry.max_height = m_height;
   info->geometry.aspect_ratio = 0.0;
-  info->timing.fps            = 60.0;
-  info->timing.sample_rate    = 0.0;
+  info->timing.fps = 60.0;
+  info->timing.sample_rate = 0.0;
 
   return GAME_ERROR_NO_ERROR;
 }
@@ -297,12 +298,14 @@ GAME_ERROR CameraDeinitialized()
   return GAME_ERROR_FAILED;
 }
 
-GAME_ERROR CameraFrameRawBuffer(const uint32_t *buffer, unsigned width, unsigned height, size_t pitch)
+GAME_ERROR CameraFrameRawBuffer(const uint32_t *buffer, unsigned width,
+    unsigned height, size_t pitch)
 {
   return GAME_ERROR_FAILED;
 }
 
-GAME_ERROR CameraFrameOpenglTexture(unsigned texture_id, unsigned texture_target, const float *affine)
+GAME_ERROR CameraFrameOpenglTexture(unsigned texture_id,
+    unsigned texture_target, const float *affine)
 {
   return GAME_ERROR_FAILED;
 }

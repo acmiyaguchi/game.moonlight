@@ -17,23 +17,22 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
- #pragma once
+#pragma once
 
 #include "PairingManager.h"
 #include <string>
 
- class NvHTTP
- {
- public:
- 	std::string getServerInfo(std::string uid);
- 	
- 	PairState getPairState(std::string serverInfo);
- 	
- 	int getCurrentGame(std::string serverInfo);
- 	
- 	PairState pair(std::string pin);
+class NvHTTP
+{
+public:
+  std::string getServerInfo(std::string uid);
 
- private:
- 	std::string openHTTPConnection(std::string url, bool enableReadTimeout);
- };
+  PairState getPairState(std::string serverInfo);
 
+  int getCurrentGame(std::string serverInfo);
+
+  PairState pair(std::string pin);
+
+private:
+  std::string openHTTPConnection(std::string url, bool enableReadTimeout);
+};

@@ -26,77 +26,77 @@ using namespace std;
 
 Preferences::Preferences()
 {
-	init(RES_720_60, false);
+  init(RES_720_60, false);
 }
 
 Preferences::Preferences(ResolutionType res, bool fullscreen)
 {
-	init(res, fullscreen);
+  init(res, fullscreen);
 }
 
 Preferences::~Preferences()
 {
-	if(m_resolution) {
-		delete m_resolution;
-	}
+  if (m_resolution)
+  {
+    delete m_resolution;
+  }
 }
 
 void Preferences::init(ResolutionType res, bool fullscreen)
 {
-	srand(time(0));
-	char buf[20];
-	sprintf(buf, "%016x", rand());
+  srand(time(0));
+  char buf[20];
+  sprintf(buf, "%016x", rand());
 
-	m_resolution = new Resolution(res);
-	m_bitrate = m_resolution->getBitrate();
-	m_fullscreen = fullscreen;
-	m_host = "GeForce PC host";
-	m_uid = buf;
+  m_resolution = new Resolution(res);
+  m_bitrate = m_resolution->getBitrate();
+  m_fullscreen = fullscreen;
+  m_host = "GeForce PC host";
+  m_uid = buf;
 }
 
 std::string Preferences::getHost() const
 {
-	return m_host;
+  return m_host;
 }
 
 void Preferences::setHost(char* host)
 {
-	m_host = host;
+  m_host = host;
 }
 
 Resolution Preferences::getResolution() const
 {
-	return *m_resolution;
+  return *m_resolution;
 }
 
 int Preferences::getBitrate() const
 {
-	return m_bitrate;
+  return m_bitrate;
 }
 
 bool Preferences::getFullscreen() const
 {
-	return m_fullscreen;
+  return m_fullscreen;
 }
 
 void Preferences::setResolution(ResolutionType res)
 {
-	delete m_resolution;
-	m_resolution = new Resolution(res);
+  delete m_resolution;
+  m_resolution = new Resolution(res);
 }
 
 void Preferences::setBitrate(int bitrate)
 {
-	m_bitrate = bitrate;
+  m_bitrate = bitrate;
 }
 
 void Preferences::setFullscreen(bool fullscreen)
 {
-	m_fullscreen = fullscreen;
+  m_fullscreen = fullscreen;
 }
 
 const std::string Preferences::getUniqueId() const
 {
-	return m_uid;
+  return m_uid;
 }
-

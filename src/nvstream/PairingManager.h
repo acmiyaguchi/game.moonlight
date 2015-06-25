@@ -17,18 +17,21 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
- #pragma once
+#pragma once
+
+#include <string>
 
 enum class PairState
 {
-	NOT_PAIRED,
-	PAIRED,
-	PIN_WRONG,
-	FAILED
+  NOT_PAIRED, PAIRED, PIN_WRONG, FAILED
 };
 
- class PairingManager
- {
- public:
- 	PairingManager() {}
- };
+class PairingManager
+{
+public:
+  PairingManager()
+  {
+  }
+  PairState pair(std::string uid, std::string pin);
+  PairState getPairState(std::string serverInfo);
+};
