@@ -28,6 +28,8 @@ namespace MOONLIGHT
   class NvHTTP
   {
   public:
+    std::string getXmlString(std::string str, std::string tagname);
+
     std::string getServerInfo(std::string uid);
 
     PairState getPairState(std::string serverInfo);

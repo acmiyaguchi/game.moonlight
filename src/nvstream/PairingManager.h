@@ -20,6 +20,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace MOONLIGHT
 {
@@ -38,6 +39,7 @@ namespace MOONLIGHT
     PairState getPairState(std::string serverInfo);
   private:
     std::string bytesToHex(unsigned char* in, unsigned len);
+    std::vector<unsigned char> hexToBytes(std::string s);
     NvHTTP* m_http;
     unsigned char m_cert_bytes[4096];
 

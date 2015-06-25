@@ -19,29 +19,35 @@
  */
 #include "NvHTTP.h"
 
+using namespace std;
 using namespace MOONLIGHT;
 
-std::string NvHTTP::getServerInfo(std::string uid)
+string getXmlString(string str, string tagname)
 {
   return "";
 }
 
-PairState NvHTTP::getPairState(std::string serverInfo)
+string NvHTTP::getServerInfo(string uid)
+{
+  return "";
+}
+
+PairState NvHTTP::getPairState(string serverInfo)
 {
   return PairState::FAILED;
 }
 
-int NvHTTP::getCurrentGame(std::string serverInfo)
+int NvHTTP::getCurrentGame(string serverInfo)
 {
   return -1;
 }
 
-PairState NvHTTP::pair(std::string pin)
+PairState NvHTTP::pair(string pin)
 {
   return PairState::FAILED;
 }
 
-std::string NvHTTP::openHTTPConnection(std::string url, bool enableReadTimeout)
+std::string NvHTTP::openHTTPConnection(string url, bool enableReadTimeout)
 {
   return "";
 }
