@@ -30,7 +30,8 @@ list(APPEND DEPLIBS ${kodiplatform_LIBRARIES}
 					moonlight)
 
 set(MOONLIGHT_SOURCES src/addon.cpp
-                      src/MoonlightClient.cpp)
+                      src/MoonlightClient.cpp
+                      src/Resolution.cpp)
 
 build_addon(game.moonlight MOONLIGHT DEPLIBS)
 
