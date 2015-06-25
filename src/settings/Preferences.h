@@ -27,7 +27,7 @@ class Preferences
 public:
 	Preferences();
 
-	Preferences(RES_TYPE res, bool fullscreen);
+	Preferences(ResolutionType res, bool fullscreen);
 
 	virtual ~Preferences();
 
@@ -41,7 +41,7 @@ public:
 
 	bool getFullscreen() const;
 
-	void setResolution(RES_TYPE res);
+	void setResolution(ResolutionType res);
 
 	void setBitrate(int bitrate);
 
@@ -50,7 +50,7 @@ public:
 	const std::string getUniqueId() const;
 
 private:
-	void init(RES_TYPE res, bool fullscreen);
+	void init(ResolutionType res, bool fullscreen);
 
 	Resolution* m_resolution;
 	int m_bitrate;

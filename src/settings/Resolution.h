@@ -19,7 +19,7 @@
  */
 #pragma once
 
-enum RES_TYPE {
+enum ResolutionType {
 	RES_720_30, 
 	RES_720_60, 
 	RES_768_30, 
@@ -35,7 +35,7 @@ enum RES_TYPE {
 class Resolution
 {
 public:
-	Resolution(RES_TYPE type);
+	Resolution(ResolutionType type);
 
 	int getWidth() const;
 

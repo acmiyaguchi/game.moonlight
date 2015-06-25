@@ -20,7 +20,7 @@
 #include "Resolution.h"
 
 
-Resolution::Resolution(RES_TYPE type) {
+Resolution::Resolution(ResolutionType type) {
 	switch(type)
 	{
 	case RES_720_30: 

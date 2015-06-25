@@ -29,7 +29,7 @@ Preferences::Preferences()
 	init(RES_720_60, false);
 }
 
-Preferences::Preferences(RES_TYPE res, bool fullscreen)
+Preferences::Preferences(ResolutionType res, bool fullscreen)
 {
 	init(res, fullscreen);
 }
@@ -41,7 +41,7 @@ Preferences::~Preferences()
 	}
 }
 
-void Preferences::init(RES_TYPE res, bool fullscreen)
+void Preferences::init(ResolutionType res, bool fullscreen)
 {
 	srand(time(0));
 	char buf[20];
@@ -79,7 +79,7 @@ bool Preferences::getFullscreen() const
 	return m_fullscreen;
 }
 
-void Preferences::setResolution(RES_TYPE res)
+void Preferences::setResolution(ResolutionType res)
 {
 	delete m_resolution;
 	m_resolution = new Resolution(res);
