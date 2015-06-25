@@ -1,6 +1,7 @@
 /*
- *      Copyright (C) 2015 Anthony Miyaguchi
- *      Copyright (C) 2015 Team XBMC
+ *      Copyright (C) 2014-2015 Garrett Brown
+ *      Copyright (C) 2014-2015 Team XBMC
+ *      Portions Copyright (C) 2013-2014 Lars Op den Kamp
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,17 +18,19 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
 
-#include "Limelight.h"
+#include "LogConsole.h"
 
-namespace MOONLIGHT
+#include <stdio.h>
+
+using namespace MOONLIGHT;
+using namespace PLATFORM;
+
+void CLogConsole::Log(SYS_LOG_LEVEL level, const char* logline)
 {
-  class CMoonlightClient
-  {
-  public:
-    void start();
-    void stop();
-    void pair();
-  };
+  // TODO: Prepend current date
+
+  CLockObject lock(m_mutex);
+
+  printf("%s\n", logline);
 }

@@ -18,7 +18,10 @@
  *
  */
 #include "MoonlightClient.h"
+#include "log/Log.h"
 #include <stddef.h>
+
+using namespace MOONLIGHT;
 
 void CMoonlightClient::start()
 {
@@ -29,6 +32,8 @@ void CMoonlightClient::start()
   config.fps = 60;
   config.bitrate = 1024;
   config.packetSize = 1024;
+
+  isyslog("CMoonlightClient::start: Starting moonlight");
   LiStartConnection(host, &config, NULL, NULL, NULL, NULL, NULL, 0, 0);
 }
 

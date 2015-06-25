@@ -1,6 +1,7 @@
 /*
- *      Copyright (C) 2015 Anthony Miyaguchi
- *      Copyright (C) 2015 Team XBMC
+ *      Copyright (C) 2014-2015 Garrett Brown
+ *      Copyright (C) 2014-2015 Team XBMC
+ *      Portions Copyright (C) 2013-2014 Lars Op den Kamp
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,15 +20,17 @@
  */
 #pragma once
 
-#include "Limelight.h"
+#include "ILog.h"
 
 namespace MOONLIGHT
 {
-  class CMoonlightClient
+  class CLogSyslog : public ILog
   {
   public:
-    void start();
-    void stop();
-    void pair();
+    CLogSyslog(void);
+    virtual ~CLogSyslog(void);
+
+    virtual void Log(SYS_LOG_LEVEL level, const char* logline);
+    virtual SYS_LOG_TYPE Type(void) const { return SYS_LOG_TYPE_SYSLOG; }
   };
 }

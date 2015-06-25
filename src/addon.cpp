@@ -22,18 +22,18 @@
 #include "kodi/xbmc_addon_dll.h"
 #include "kodi/kodi_game_dll.h"
 #include "MoonlightClient.h"
+#include "log/Log.h"
+#include "log/LogConsole.h"
+#include "utils/CommonMacros.h"
 
 #include <vector>
 
 using namespace ADDON;
-
-#if !defined(SAFE_DELETE)
-#define SAFE_DELETE(x)  do { delete (x); (x) = NULL; } while (0)
-#endif
+using namespace MOONLIGHT;
 
 CHelper_libXBMC_addon* KODI = NULL;
 CHelper_libKODI_game* FRONTEND = NULL;
-CMoonlightClient* MOONLIGHT = NULL;
+CMoonlightClient* CLIENT = NULL;
 
 const size_t m_width = 800;
 const size_t m_height = 600;
@@ -56,13 +56,15 @@ ADDON_STATUS ADDON_Create(void* callbacks, void* props)
     if (!FRONTEND || !FRONTEND->RegisterMe(callbacks))
       throw ADDON_STATUS_PERMANENT_FAILURE;
 
-    MOONLIGHT = new CMoonlightClient;
+    CLog::Get().SetPipe(new CLogConsole());
+
+    CLIENT = new CMoonlightClient;
 
   } catch (const ADDON_STATUS& status)
   {
     SAFE_DELETE(KODI);
     SAFE_DELETE(FRONTEND);
-    SAFE_DELETE(MOONLIGHT);
+    SAFE_DELETE(CLIENT);
     return status;
   }
 
@@ -71,14 +73,16 @@ ADDON_STATUS ADDON_Create(void* callbacks, void* props)
 
 void ADDON_Stop()
 {
-  MOONLIGHT->stop();
+  CLIENT->stop();
 }
 
 void ADDON_Destroy()
 {
+  CLog::Get().SetType(SYS_LOG_TYPE_CONSOLE);
+
   SAFE_DELETE(KODI);
   SAFE_DELETE(FRONTEND);
-  SAFE_DELETE(MOONLIGHT);
+  SAFE_DELETE(CLIENT);
 }
 
 ADDON_STATUS ADDON_GetStatus()
@@ -136,7 +140,7 @@ GAME_ERROR LoadGameSpecial(GAME_TYPE type, const char** urls, size_t num_urls)
 
 GAME_ERROR LoadStandalone(void)
 {
-  MOONLIGHT->start();
+  CLIENT->start();
   return GAME_ERROR_NO_ERROR;
 }
 

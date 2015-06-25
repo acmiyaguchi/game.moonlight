@@ -33,6 +33,10 @@ list(APPEND DEPLIBS ${kodiplatform_LIBRARIES}
 
 set(MOONLIGHT_SOURCES src/addon.cpp
                       src/MoonlightClient.cpp
+                      src/log/Log.cpp
+                      src/log/LogAddon.cpp
+                      src/log/LogConsole.cpp
+                      src/log/LogSyslog.cpp
                       src/nvstream/NvHTTP.cpp
                       src/nvstream/PairingManager.cpp
                       src/settings/Resolution.cpp
