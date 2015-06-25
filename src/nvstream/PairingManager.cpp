@@ -30,7 +30,6 @@
 #include <openssl/pem.h>
 #include <openssl/err.h>
 
-using namespace std;
 using namespace MOONLIGHT;
 
 PairingManager::PairingManager(NvHTTP* http) :
@@ -39,9 +38,9 @@ PairingManager::PairingManager(NvHTTP* http) :
   m_cert = NULL;
 }
 
-PairState PairingManager::pair(string uid, string pin)
+PairState PairingManager::pair(std::string uid, std::string pin)
 {
-  stringstream url;
+  std::stringstream url;
 
   unsigned char salt_data[16];
   RAND_bytes(salt_data, 16);
@@ -50,8 +49,8 @@ PairState PairingManager::pair(string uid, string pin)
   unsigned char aes_key_hash[20];
   unsigned char salted_pin[20];
   // saltPin
-  memcpy(salted_pin, salt_data, 16);
-  memcpy(salted_pin + 16, pin.c_str(), 4);
+  std::memcpy(salted_pin, salt_data, 16);
+  std::memcpy(salted_pin + 16, pin.c_str(), 4);
   // generateAesKey
   SHA1(salted_pin, 20, aes_key_hash);
   AES_set_encrypt_key(aes_key_hash, 128, &aes_key);
@@ -61,7 +60,7 @@ PairState PairingManager::pair(string uid, string pin)
       << "&devicename=roth&updateState=1&phrase=getservercert&salt="
       << bytesToHex(salt_data, 16) << "&clientcert="
       << bytesToHex(m_cert_bytes, 4096);
-  string get_cert = m_http->openHttpConnection(url.str(), false);
+  std::string get_cert = m_http->openHttpConnection(url.str(), false);
   url.str("");
 
   if (m_http->getXmlString(get_cert, "paired") != "1")
@@ -81,7 +80,7 @@ PairState PairingManager::pair(string uid, string pin)
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&clientchallenge="
       << bytesToHex(challenge_encrypted, 16);
-  string challenge_resp = m_http->openHttpConnection(url.str(), true);
+  std::string challenge_resp = m_http->openHttpConnection(url.str(), true);
   url.str("");
 
   if (m_http->getXmlString(challenge_resp, "paired") != "1")
@@ -92,9 +91,9 @@ PairState PairingManager::pair(string uid, string pin)
   }
 
   // decode the server response and subsequent challenge
-  vector<unsigned char> challenge_resp_encoded = hexToBytes(
+  std::vector<unsigned char> challenge_resp_encoded = hexToBytes(
       m_http->getXmlString(challenge_resp, "challengeresponse"));
-  vector<unsigned char> challenge_resp_decoded(challenge_resp_encoded.size());
+  std::vector<unsigned char> challenge_resp_decoded(challenge_resp_encoded.size());
 
   for (int i = 0; i < 48; i += 16)
   {
@@ -109,9 +108,9 @@ PairState PairingManager::pair(string uid, string pin)
   unsigned char server_challenge[16 + 256 + 16];
   unsigned char challenge_resp_hash[32];
   unsigned char challenge_resp_encrypted[32];
-  memcpy(server_challenge, &challenge_resp_decoded[0] + 20, 16);
-  memcpy(server_challenge + 16, m_cert->signature->data, 256);
-  memcpy(server_challenge + 16 + 256, client_secret, 16);
+  std::memcpy(server_challenge, &challenge_resp_decoded[0] + 20, 16);
+  std::memcpy(server_challenge + 16, m_cert->signature->data, 256);
+  std::memcpy(server_challenge + 16 + 256, client_secret, 16);
   SHA1(server_challenge, 16 + 256 + 16, challenge_resp_hash);
 
   for (int i = 0; i < 32; i += 16)
@@ -123,7 +122,7 @@ PairState PairingManager::pair(string uid, string pin)
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&serverchallengeresp="
       << bytesToHex(challenge_resp_encrypted, 32);
-  string secret_resp = m_http->openHttpConnection(url.str(), true);
+  std::string secret_resp = m_http->openHttpConnection(url.str(), true);
   url.str("");
   if(m_http->getXmlString(secret_resp, "paired") != "1")
   {
@@ -137,26 +136,26 @@ PairState PairingManager::pair(string uid, string pin)
   return PairState::FAILED;
 }
 
-PairState PairingManager::getPairState(string serverInfo)
+PairState PairingManager::getPairState(std::string serverInfo)
 {
   return PairState::FAILED;
 }
 
-string PairingManager::bytesToHex(unsigned char* in, unsigned len)
+std::string PairingManager::bytesToHex(unsigned char* in, unsigned len)
 {
-  stringstream ss;
-  ss << hex << setfill('0');
+  std::stringstream ss;
+  ss << std::hex << std::setfill('0');
   for (int i = 0; i < len; i++)
   {
-    ss << setw(2) << static_cast<unsigned>(in[i]);
+    ss << std::setw(2) << static_cast<unsigned>(in[i]);
   }
   return ss.str();
 }
 
-vector<unsigned char> hexToBytes(string s)
+std::vector<unsigned char> hexToBytes(std::string s)
 {
   int len = s.length();
-  vector<unsigned char> data(len / 2);
+  std::vector<unsigned char> data(len / 2);
   for (int i = 0; i < len; i += 2)
   {
     data[i / 2] = ((s[i] - '0') << 4) | (s[i + 1] - '0');
