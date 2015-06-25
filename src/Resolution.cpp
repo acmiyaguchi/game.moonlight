@@ -44,3 +44,23 @@ void Resolution::setResolution(int width, int height, int framerate, int bitrate
 	m_framerate = framerate;
 	m_bitrate = bitrate;
 }
+
+int Resolution::getWidth() const
+{
+	return m_width;
+}
+
+int Resolution::getHeight() const
+{
+	return m_height;
+}
+
+int Resolution::getFramerate() const
+{
+	return m_framerate;
+}
+
+int Resolution::getBitrate() const
+{
+	return m_bitrate;
+}

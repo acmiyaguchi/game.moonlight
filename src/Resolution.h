@@ -36,6 +36,15 @@ class Resolution
 {
 public:
 	Resolution(RES_TYPE type);
+
+	int getWidth() const;
+
+	int getHeight() const;
+
+	int getFramerate() const;
+
+	int getBitrate() const;
+	
 private:
 	void setResolution(int width, int height, int framerate, int bitrate);
 	int m_width;
