@@ -34,6 +34,7 @@ list(APPEND DEPLIBS ${kodiplatform_LIBRARIES}
 set(MOONLIGHT_SOURCES src/addon.cpp
                       src/MoonlightClient.cpp
                       src/nvstream/NvHTTP.cpp
+                      src/nvstream/PairingManager.cpp
                       src/settings/Resolution.cpp
                       src/settings/Preferences.cpp)
 

@@ -33,6 +33,7 @@ public:
 
   PairState pair(std::string pin);
 
-private:
   std::string openHTTPConnection(std::string url, bool enableReadTimeout);
+
+  std::string baseUrlHttps;
 };
