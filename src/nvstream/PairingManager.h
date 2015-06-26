@@ -43,6 +43,7 @@ namespace MOONLIGHT
     std::string bytesToHex(unsigned char* in, unsigned len);
     std::vector<unsigned char> hexToBytes(std::string s);
     bool verifySignature(std::vector<unsigned char> data, std::vector<unsigned char> signature, EVP_PKEY *pkey);
+    std::vector<unsigned char> signData(std::vector<unsigned char> data, EVP_PKEY *pkey);
 
     NvHTTP* m_http;
     unsigned char m_cert_bytes[4096];

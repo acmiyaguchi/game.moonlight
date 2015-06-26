@@ -106,6 +106,8 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   unsigned char client_secret[16];
   RAND_bytes(client_secret, 16);
 
+  std::vector<unsigned char> server_response(&challenge_resp_decoded[0],
+      &challenge_resp_decoded[20]);
   unsigned char server_challenge[16 + 256 + 16];
   unsigned char challenge_resp_hash[32];
   unsigned char challenge_resp_encrypted[32];
@@ -140,7 +142,7 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   std::vector<unsigned char> server_signature(server_secret_resp.begin() + 16,
       server_secret_resp.begin() + 272);
 
-  if(!verifySignature(server_secret, server_signature, m_private_key))
+  if (!verifySignature(server_secret, server_signature, m_private_key))
   {
     url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
     m_http->openHttpConnection(url.str(), true);
@@ -148,10 +150,47 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   }
 
   // ensure the server challenge matched what we expected
+  //TODO: concat challenge_data, m_cert->signature->data (256), server_secret
+  std::vector<unsigned char> server_challenge_resp_hash;
+  if (server_challenge_resp_hash != server_response)
+  {
+    url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
+    m_http->openHttpConnection(url.str(), true);
+    return PairState::PIN_WRONG;
+  }
 
   // send the server our signed secret
+  std::vector<unsigned char> client_pairing_secret(16 + 256);
+  std::memcpy(&client_pairing_secret[0], client_secret, 16);
+  std::vector<unsigned char> signed_data = signData(
+      std::vector<unsigned char>(client_secret, client_secret + 16),
+      m_private_key);
+  client_pairing_secret.insert(client_pairing_secret.begin(),
+      signed_data.begin(), signed_data.end());
+
+  url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
+      << "&devicename=roth&updateState=1&clientpairingsecret="
+      << bytesToHex(&client_pairing_secret[0], client_pairing_secret.size());
+  std::string client_secret_resp = m_http->openHttpConnection(url.str(), true);
+  url.str("");
+  if (m_http->getXmlString(client_secret_resp, "paired") != "1")
+  {
+    url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
+    m_http->openHttpConnection(url.str(), true);
+    return PairState::FAILED;
+  }
 
   //do initial challenges
+  url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
+      << "&devicename=roth&updateState=1&phrase=pairchallenge";
+  std::string pair_challenge = m_http->openHttpConnection(url.str(), true);
+  url.str("");
+  if (m_http->getXmlString(pair_challenge, "paired") != "1")
+  {
+    url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
+    m_http->openHttpConnection(url.str(), true);
+    return PairState::FAILED;
+  }
 
   return PairState::PAIRED;
 }
@@ -183,8 +222,17 @@ std::vector<unsigned char> hexToBytes(std::string s)
   return data;
 }
 
-bool PairingManager::verifySignature(std::vector<unsigned char> data, std::vector<unsigned char> signature, EVP_PKEY *pkey)
+// TODO
+bool PairingManager::verifySignature(std::vector<unsigned char> data,
+    std::vector<unsigned char> signature, EVP_PKEY *pkey)
 {
   return false;
+}
+
+// TODO
+std::vector<unsigned char> PairingManager::signData(
+    std::vector<unsigned char> data, EVP_PKEY *pkey)
+{
+  return std::vector<unsigned char>();
 }
 
