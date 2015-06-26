@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <openssl/x509.h>
+#include <openssl/evp.h>
 
 namespace MOONLIGHT
 {
@@ -41,8 +42,11 @@ namespace MOONLIGHT
   private:
     std::string bytesToHex(unsigned char* in, unsigned len);
     std::vector<unsigned char> hexToBytes(std::string s);
+    bool verifySignature(std::vector<unsigned char> data, std::vector<unsigned char> signature, EVP_PKEY *pkey);
+
     NvHTTP* m_http;
     unsigned char m_cert_bytes[4096];
     X509* m_cert;
+    EVP_PKEY* m_private_key;
   };
 }

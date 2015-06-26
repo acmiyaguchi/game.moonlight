@@ -26,7 +26,6 @@
 #include <openssl/sha.h>
 #include <openssl/aes.h>
 #include <openssl/rand.h>
-#include <openssl/evp.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
 
@@ -36,6 +35,7 @@ PairingManager::PairingManager(NvHTTP* http) :
     m_http(http)
 {
   m_cert = NULL;
+  m_private_key = NULL;
 }
 
 PairState PairingManager::pair(std::string uid, std::string pin)
@@ -93,7 +93,8 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   // decode the server response and subsequent challenge
   std::vector<unsigned char> challenge_resp_encoded = hexToBytes(
       m_http->getXmlString(challenge_resp, "challengeresponse"));
-  std::vector<unsigned char> challenge_resp_decoded(challenge_resp_encoded.size());
+  std::vector<unsigned char> challenge_resp_decoded(
+      challenge_resp_encoded.size());
 
   for (int i = 0; i < 48; i += 16)
   {
@@ -124,16 +125,35 @@ PairState PairingManager::pair(std::string uid, std::string pin)
       << bytesToHex(challenge_resp_encrypted, 32);
   std::string secret_resp = m_http->openHttpConnection(url.str(), true);
   url.str("");
-  if(m_http->getXmlString(secret_resp, "paired") != "1")
+  if (m_http->getXmlString(secret_resp, "paired") != "1")
   {
     url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
     m_http->openHttpConnection(url.str(), true);
     return PairState::FAILED;
   }
 
+  std::vector<unsigned char> server_secret_resp = hexToBytes(
+      m_http->getXmlString(secret_resp, "pairingsecret"));
   // get the servers signed secret
+  std::vector<unsigned char> server_secret(server_secret_resp.begin(),
+      server_secret_resp.begin() + 16);
+  std::vector<unsigned char> server_signature(server_secret_resp.begin() + 16,
+      server_secret_resp.begin() + 272);
 
-  return PairState::FAILED;
+  if(!verifySignature(server_secret, server_signature, m_private_key))
+  {
+    url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
+    m_http->openHttpConnection(url.str(), true);
+    return PairState::FAILED;
+  }
+
+  // ensure the server challenge matched what we expected
+
+  // send the server our signed secret
+
+  //do initial challenges
+
+  return PairState::PAIRED;
 }
 
 PairState PairingManager::getPairState(std::string serverInfo)
@@ -162,3 +182,9 @@ std::vector<unsigned char> hexToBytes(std::string s)
   }
   return data;
 }
+
+bool PairingManager::verifySignature(std::vector<unsigned char> data, std::vector<unsigned char> signature, EVP_PKEY *pkey)
+{
+  return false;
+}
+
