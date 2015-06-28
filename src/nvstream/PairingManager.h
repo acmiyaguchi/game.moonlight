@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <array>
 #include <openssl/x509.h>
 #include <openssl/evp.h>
 
@@ -46,7 +47,7 @@ namespace MOONLIGHT
     std::vector<unsigned char> signData(std::vector<unsigned char> data, EVP_PKEY *pkey);
 
     NvHTTP* m_http;
-    unsigned char m_cert_bytes[4096];
+    std::array<unsigned char, 4096> m_cert_bytes;
     X509* m_cert;
     EVP_PKEY* m_private_key;
   };

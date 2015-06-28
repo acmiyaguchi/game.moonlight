@@ -20,6 +20,7 @@
 #include "PairingManager.h"
 #include "NvHTTP.h"
 #include <sstream>
+#include <algorithm>
 #include <iomanip>
 #include <cstring>
 #include <cstdlib>
@@ -42,24 +43,24 @@ PairState PairingManager::pair(std::string uid, std::string pin)
 {
   std::stringstream url;
 
-  unsigned char salt_data[16];
-  RAND_bytes(salt_data, 16);
+  std::array<unsigned char, 16> salt;
+  RAND_bytes(salt.data(), salt.size());
 
   AES_KEY aes_key;
-  unsigned char aes_key_hash[20];
-  unsigned char salted_pin[20];
+  std::array<unsigned char, 20> aes_key_hash;
+  std::array<unsigned char, 20> salted_pin;
   // saltPin
-  std::memcpy(salted_pin, salt_data, 16);
-  std::memcpy(salted_pin + 16, pin.c_str(), 4);
+  std::copy(salt.begin(), salt.end(), salted_pin.begin());
+  std::copy(pin.begin(), pin.end(), salted_pin.begin() + 16);
   // generateAesKey
-  SHA1(salted_pin, 20, aes_key_hash);
-  AES_set_encrypt_key(aes_key_hash, 128, &aes_key);
+  SHA1(salted_pin.data(), 20, aes_key_hash.data());
+  AES_set_encrypt_key(aes_key_hash.data(), 128, &aes_key);
 
   // Send the salt and get the server cert.
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&phrase=getservercert&salt="
-      << bytesToHex(salt_data, 16) << "&clientcert="
-      << bytesToHex(m_cert_bytes, 4096);
+      << bytesToHex(salt.data(), salt.size()) << "&clientcert="
+      << bytesToHex(m_cert_bytes.data(), m_cert_bytes.size());
   std::string get_cert = m_http->openHttpConnection(url.str(), false);
   url.str("");
 
@@ -71,15 +72,15 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   }
 
   // generate challenge data
-  unsigned char challenge_data[16];
-  unsigned char challenge_encrypted[16];
-  RAND_bytes(challenge_data, 16);
-  AES_encrypt(challenge_data, challenge_encrypted, &aes_key);
+  std::array<unsigned char, 16> random_challenge;
+  std::array<unsigned char, 16> encrypted_challenge;
+  RAND_bytes(random_challenge.data(), random_challenge.size());
+  AES_encrypt(random_challenge.data(), encrypted_challenge.data(), &aes_key);
 
   // send the encrypted challenge to the server
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&clientchallenge="
-      << bytesToHex(challenge_encrypted, 16);
+      << bytesToHex(encrypted_challenge.data(), encrypted_challenge.size());
   std::string challenge_resp = m_http->openHttpConnection(url.str(), true);
   url.str("");
 
@@ -91,40 +92,42 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   }
 
   // decode the server response and subsequent challenge
-  std::vector<unsigned char> challenge_resp_encoded = hexToBytes(
+  std::vector<unsigned char> enc_challenge_resp = hexToBytes(
       m_http->getXmlString(challenge_resp, "challengeresponse"));
-  std::vector<unsigned char> challenge_resp_decoded(
-      challenge_resp_encoded.size());
+  std::vector<unsigned char> dec_challenge_resp(enc_challenge_resp.size());
 
   for (int i = 0; i < 48; i += 16)
   {
-    AES_decrypt(&challenge_resp_encoded[i], &challenge_resp_decoded[i],
-        &aes_key);
+    AES_decrypt(&enc_challenge_resp[i], &dec_challenge_resp[i], &aes_key);
   }
 
   // compute the challenge response hash
-  unsigned char client_secret[16];
-  RAND_bytes(client_secret, 16);
+  std::vector<unsigned char> client_secret(16);
+  RAND_bytes(client_secret.data(), client_secret.size());
 
-  std::vector<unsigned char> server_response(&challenge_resp_decoded[0],
-      &challenge_resp_decoded[20]);
-  unsigned char server_challenge[16 + 256 + 16];
-  unsigned char challenge_resp_hash[32];
-  unsigned char challenge_resp_encrypted[32];
-  std::memcpy(server_challenge, &challenge_resp_decoded[0] + 20, 16);
-  std::memcpy(server_challenge + 16, m_cert->signature->data, 256);
-  std::memcpy(server_challenge + 16 + 256, client_secret, 16);
-  SHA1(server_challenge, 16 + 256 + 16, challenge_resp_hash);
+  std::vector<unsigned char> server_response(dec_challenge_resp.begin(),
+      server_response.begin() + 20);
+
+  std::array<unsigned char, 16 + 256 + 16> server_challenge;
+  std::array<unsigned char, 32> challenge_resp_hash;
+  std::array<unsigned char, 32> challenge_resp_encrypted;
+  std::copy_n(dec_challenge_resp.begin() + 20, 16, server_challenge.begin());
+  std::memcpy(server_challenge.data() + 16, m_cert->signature->data, 256);
+  std::copy(client_secret.begin(), client_secret.end(),
+      server_response.begin() + 16 + 256);
+  SHA1(server_challenge.data(), server_challenge.size(),
+      challenge_resp_hash.data());
 
   for (int i = 0; i < 32; i += 16)
   {
-    AES_encrypt(&challenge_resp_hash[i], &challenge_resp_encrypted[i],
-        &aes_key);
+    AES_encrypt(&challenge_resp_hash.data()[i],
+        &challenge_resp_encrypted.data()[i], &aes_key);
   }
 
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&serverchallengeresp="
-      << bytesToHex(challenge_resp_encrypted, 32);
+      << bytesToHex(challenge_resp_encrypted.data(),
+          challenge_resp_encrypted.size());
   std::string secret_resp = m_http->openHttpConnection(url.str(), true);
   url.str("");
   if (m_http->getXmlString(secret_resp, "paired") != "1")
@@ -137,10 +140,10 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   std::vector<unsigned char> server_secret_resp = hexToBytes(
       m_http->getXmlString(secret_resp, "pairingsecret"));
   // get the servers signed secret
-  std::vector<unsigned char> server_secret(server_secret_resp.begin(),
-      server_secret_resp.begin() + 16);
-  std::vector<unsigned char> server_signature(server_secret_resp.begin() + 16,
-      server_secret_resp.begin() + 272);
+  std::vector<unsigned char> server_secret(16);
+  std::copy_n(server_secret_resp.begin(), 16, server_secret.begin());
+  std::vector<unsigned char> server_signature(256);
+  std::copy_n(server_secret_resp.begin() + 16, 256, server_signature.begin());
 
   if (!verifySignature(server_secret, server_signature, m_private_key))
   {
@@ -161,12 +164,10 @@ PairState PairingManager::pair(std::string uid, std::string pin)
 
   // send the server our signed secret
   std::vector<unsigned char> client_pairing_secret(16 + 256);
-  std::memcpy(&client_pairing_secret[0], client_secret, 16);
-  std::vector<unsigned char> signed_data = signData(
-      std::vector<unsigned char>(client_secret, client_secret + 16),
+  std::copy(client_secret.begin(), client_secret.end(), client_pairing_secret.begin());
+  std::vector<unsigned char> signed_data = signData(client_secret,
       m_private_key);
-  client_pairing_secret.insert(client_pairing_secret.begin(),
-      signed_data.begin(), signed_data.end());
+  std::copy(signed_data.begin(), signed_data.end(), client_pairing_secret.begin() + 16);
 
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&clientpairingsecret="
