@@ -25,7 +25,7 @@ using namespace MOONLIGHT;
 
 void CMoonlightClient::start()
 {
-  IP_ADDRESS host = 3232235861; //192.168.1.85
+  const char* host = "192.168.1.85"; //192.168.1.85
   STREAM_CONFIGURATION config;
   config.width = 800;
   config.height = 600;
