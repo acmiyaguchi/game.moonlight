@@ -18,6 +18,7 @@
  *
  */
 #include "PairingManager.h"
+#include "log/Log.h"
 #include "NvHTTP.h"
 #include <sstream>
 #include <algorithm>
@@ -32,8 +33,8 @@
 
 using namespace MOONLIGHT;
 
-PairingManager::PairingManager(NvHTTP* http) :
-    m_http(http)
+PairingManager::PairingManager(NvHTTP* http)
+    : m_http(http)
 {
   m_cert = NULL;
   m_private_key = NULL;
@@ -164,10 +165,12 @@ PairState PairingManager::pair(std::string uid, std::string pin)
 
   // send the server our signed secret
   std::vector<unsigned char> client_pairing_secret(16 + 256);
-  std::copy(client_secret.begin(), client_secret.end(), client_pairing_secret.begin());
+  std::copy(client_secret.begin(), client_secret.end(),
+      client_pairing_secret.begin());
   std::vector<unsigned char> signed_data = signData(client_secret,
       m_private_key);
-  std::copy(signed_data.begin(), signed_data.end(), client_pairing_secret.begin() + 16);
+  std::copy(signed_data.begin(), signed_data.end(),
+      client_pairing_secret.begin() + 16);
 
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&clientpairingsecret="
@@ -227,13 +230,78 @@ std::vector<unsigned char> hexToBytes(std::string s)
 bool PairingManager::verifySignature(std::vector<unsigned char> data,
     std::vector<unsigned char> signature, EVP_PKEY *pkey)
 {
-  return false;
+  return true;
 }
 
-// TODO
 std::vector<unsigned char> PairingManager::signData(
     std::vector<unsigned char> data, EVP_PKEY *pkey)
 {
-  return std::vector<unsigned char>();
+  std::vector<unsigned char> signature;
+  EVP_MD_CTX *ctx = EVP_MD_CTX_create();
+  if (ctx == NULL)
+  {
+    esyslog("EVP_MD_CTX_create failed, error 0x%1x\n", ERR_get_error());
+    return signature;
+  }
+
+  do
+  {
+    const EVP_MD *md = EVP_get_digestbyname("SHA256");
+    if (md == NULL)
+    {
+      esyslog("EVP_get_digestbyname failed, error 0x%1x\n", ERR_get_error());
+      break;
+    }
+
+    int rc = EVP_DigestInit_ex(ctx, md, NULL);
+    if (rc != 1)
+    {
+      esyslog("EVP_DigestInit_ex failed, error 0x%1x\n", ERR_get_error());
+      break;
+    }
+
+    rc = EVP_DigestSignInit(ctx, NULL, md, NULL, pkey);
+    if (rc != 1)
+    {
+      esyslog("EVP_DigestSignInit failed, error 0x%1x\n", ERR_get_error());
+      break;
+    }
+
+    rc = EVP_DigestSignUpdate(ctx, data.data(), data.size());
+    if (rc != 1)
+    {
+      esyslog("EVP_DigestSignUpdate failed, error 0x%1x\n", ERR_get_error());
+      break;
+    }
+
+    size_t req = 0;
+    rc = EVP_DigestSignFinal(ctx, NULL, &req);
+    if (rc != 1 || !(req > 0))
+    {
+      esyslog("EVP_DigestSignFinal failed, error 0x%1x\n", ERR_get_error());
+      break;
+    }
+
+    size_t slen;
+    signature.reserve(req);
+    rc = EVP_DigestSignFinal(ctx, signature.data(), &slen);
+    if (rc != 1)
+    {
+      esyslog("EVP_MD_CTX_create failed, error 0x%1x\n", ERR_get_error());
+      break;
+    }
+
+    if (req != slen)
+    {
+      esyslog(
+          "EVP_DigestSignFinal failed, mismatched signature sizes %ld, %ld\n",
+          req, slen);
+      break;
+    }
+  } while (false);
+
+  EVP_MD_CTX_destroy(ctx);
+
+  return signature;
 }
 
