@@ -21,13 +21,15 @@
 
 #include "PairingManager.h"
 #include <string>
-
+#include "curl_easy.h"
 
 namespace MOONLIGHT
 {
   class NvHTTP
   {
   public:
+    NvHTTP();
+
     std::string getXmlString(std::string str, std::string tagname);
 
     std::string getServerInfo(std::string uid);
@@ -41,5 +43,7 @@ namespace MOONLIGHT
     std::string openHttpConnection(std::string url, bool enableReadTimeout);
 
     std::string baseUrlHttps;
+  private:
+    curl::curl_easy m_curl;
   };
 }

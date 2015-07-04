@@ -18,10 +18,31 @@
  *
  */
 #include "NvHTTP.h"
+#include <sstream>
 
 using namespace MOONLIGHT;
+using curl::curl_easy;
 
-std::string getXmlString(std::string str, std::string tagname)
+namespace
+{
+  const char *pCertFile = "./client.pem";
+  const char *pKeyFile = "./key.pem";
+}
+
+NvHTTP::NvHTTP()
+{
+  m_curl.add(curl_pair<CURLoption, long>(CURLOPT_SSL_VERIFYHOST, 0L));
+  m_curl.add(curl_pair<CURLoption, long>(CURLOPT_SSLENGINE_DEFAULT, 1L));
+  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLCERTTYPE, "PEM"));
+  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLCERT, pCertFile));
+  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLKEYTYPE, "PEM"));
+  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLKEY, pKeyFile));
+  m_curl.add(curl_pair<CURLoption, long>(CURLOPT_SSL_VERIFYPEER, 0L));
+  m_curl.add(curl_pair<CURLoption, long>(CURLOPT_FAILONERROR, 1L));
+
+}
+
+std::string NvHTTP::getXmlString(std::string str, std::string tagname)
 {
   return "";
 }
@@ -48,5 +69,19 @@ PairState NvHTTP::pair(std::string pin)
 
 std::string NvHTTP::openHttpConnection(std::string url, bool enableReadTimeout)
 {
-  return "";
+  std::stringstream data;
+
+  // watch the data coming into curl
+  curl_writer writer(data);
+  curl_writer easy(writer);
+
+  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_URL, url));
+  try {
+    m_curl.perform();
+  }
+  catch (curl_easy_exception error) {
+    error.print_traceback();
+  }
+
+  return data.str();
 }
