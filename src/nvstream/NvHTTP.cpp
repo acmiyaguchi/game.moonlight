@@ -19,6 +19,7 @@
  */
 #include "NvHTTP.h"
 #include <sstream>
+#include <tinyxml.h>
 
 using namespace MOONLIGHT;
 using curl::curl_easy;
@@ -44,7 +45,22 @@ NvHTTP::NvHTTP()
 
 std::string NvHTTP::getXmlString(std::string str, std::string tagname)
 {
-  return "";
+  TiXmlDocument doc;
+  doc.Parse(str.c_str(), 0, TIXML_ENCODING_UTF8);
+
+  TiXmlElement* child = doc.FirstChild("root")->ToElement();
+
+  const char* attribute;
+  for (child; child; child = child->NextSiblingElement())
+  {
+    attribute = child->Attribute(tagname.c_str());
+    if (attribute)
+    {
+      break;
+    }
+  }
+  std::string ret(attribute);
+  return ret;
 }
 
 std::string NvHTTP::getServerInfo(std::string uid)
