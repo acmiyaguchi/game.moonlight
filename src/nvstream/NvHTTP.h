@@ -25,10 +25,14 @@
 
 namespace MOONLIGHT
 {
+  class PairingManager;
+
   class NvHTTP
   {
   public:
-    NvHTTP();
+    NvHTTP(const char* host, std::string uid);
+
+    virtual ~NvHTTP();
 
     std::string getXmlString(std::string str, std::string tagname);
 
@@ -43,7 +47,10 @@ namespace MOONLIGHT
     std::string openHttpConnection(std::string url, bool enableReadTimeout);
 
     std::string baseUrlHttps;
+    std::string baseUrlHttp;
   private:
+    PairingManager* m_pm;
+    std::string     m_uid;
     curl::curl_easy m_curl;
   };
 }

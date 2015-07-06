@@ -18,6 +18,7 @@
  *
  */
 #include "NvHTTP.h"
+#include "PairingManager.h"
 #include <sstream>
 #include <tinyxml.h>
 
@@ -28,10 +29,26 @@ namespace
 {
   const char *pCertFile = "./client.pem";
   const char *pKeyFile = "./key.pem";
+  const int HTTPS_PORT = 47984;
+  const int HTTP_PORT = 47989;
+  const int CONNECTION_TIMEOUT = 3000;
+  const int READ_TIMEOUT = 5000;
 }
 
-NvHTTP::NvHTTP()
+NvHTTP::NvHTTP(const char* host, std::string uid) :
+  m_uid(uid)
 {
+  std::stringstream ss;
+  ss << "https://" << host << ":" << HTTPS_PORT;
+  baseUrlHttps = ss.str();
+
+  ss.str("");
+  ss << "http://" << host << ":" << HTTP_PORT;
+  baseUrlHttp = ss.str();
+
+  m_pm = new PairingManager(this);
+
+  // Options for curl
   m_curl.add(curl_pair<CURLoption, long>(CURLOPT_SSL_VERIFYHOST, 0L));
   m_curl.add(curl_pair<CURLoption, long>(CURLOPT_SSLENGINE_DEFAULT, 1L));
   m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLCERTTYPE, "PEM"));
@@ -40,7 +57,11 @@ NvHTTP::NvHTTP()
   m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLKEY, pKeyFile));
   m_curl.add(curl_pair<CURLoption, long>(CURLOPT_SSL_VERIFYPEER, 0L));
   m_curl.add(curl_pair<CURLoption, long>(CURLOPT_FAILONERROR, 1L));
+}
 
+NvHTTP::~NvHTTP()
+{
+  delete m_pm;
 }
 
 std::string NvHTTP::getXmlString(std::string str, std::string tagname)
@@ -80,7 +101,7 @@ int NvHTTP::getCurrentGame(std::string serverInfo)
 
 PairState NvHTTP::pair(std::string pin)
 {
-  return PairState::FAILED;
+  return m_pm->pair(m_uid, pin);
 }
 
 std::string NvHTTP::openHttpConnection(std::string url, bool enableReadTimeout)
