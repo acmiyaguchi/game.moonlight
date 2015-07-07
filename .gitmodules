@@ -3,4 +3,4 @@
 	url = https://github.com/acmiyaguchi/moonlight-common-c.git
 [submodule "lib/curlcpp"]
 	path = lib/curlcpp
-	url = https://github.com/JosephP91/curlcpp.git
+	url = https://github.com/acmiyaguchi/curlcpp.git

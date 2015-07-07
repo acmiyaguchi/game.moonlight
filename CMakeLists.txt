@@ -12,7 +12,6 @@ find_package(kodi REQUIRED)
 find_package(kodiplatform REQUIRED)
 find_package(platform REQUIRED)
 find_package(TinyXML REQUIRED)
-find_package(CURL REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 include_directories(${INCLUDES}
@@ -26,9 +25,10 @@ include_directories(${INCLUDES}
                     ${PROJECT_SOURCE_DIR}/lib/moonlight/limelight-common)
 
 list(APPEND DEPLIBS ${kodiplatform_LIBRARIES} 
-					${platform_LIBRARIES} 
-					${TINYXML_LIBRARIES} 
-          ${OPENSSL_LIBRARIES}
+					${platform_LIBRARIES}
+					${TINYXML_LIBRARIES}
+          			${OPENSSL_LIBRARIES}
+          			curlcpp
 					moonlight)
 
 set(MOONLIGHT_SOURCES src/addon.cpp
