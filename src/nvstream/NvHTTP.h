@@ -38,6 +38,10 @@ namespace MOONLIGHT
 
     std::string getServerInfo(std::string uid);
 
+    std::string getServerVersion(std::string serverInfo);
+
+    PairState getPairState();
+
     PairState getPairState(std::string serverInfo);
 
     int getCurrentGame(std::string serverInfo);

@@ -18,6 +18,7 @@
  *
  */
 #include "NvHTTP.h"
+#include "log/Log.h"
 #include "PairingManager.h"
 #include <sstream>
 #include <tinyxml.h>
@@ -72,7 +73,7 @@ std::string NvHTTP::getXmlString(std::string str, std::string tagname)
   TiXmlElement* child = doc.FirstChild("root")->ToElement();
 
   const char* attribute;
-  for (child; child; child = child->NextSiblingElement())
+  for (; child; child = child->NextSiblingElement())
   {
     attribute = child->Attribute(tagname.c_str());
     if (attribute)
@@ -86,12 +87,30 @@ std::string NvHTTP::getXmlString(std::string str, std::string tagname)
 
 std::string NvHTTP::getServerInfo(std::string uid)
 {
-  return "";
+  std::stringstream url;
+  url << baseUrlHttps << "/serverinfo?uniqueid=" << m_uid;
+
+  std::string resp = openHttpConnection(url.str(), true);
+
+  // TODO: Incomplete function, need to default to http in the case that the
+  // client is unpaired with the host
+
+  return resp;
+}
+
+std::string NvHTTP::getServerVersion(std::string serverInfo)
+{
+  getXmlString(serverInfo, "appversion");
+}
+
+PairState NvHTTP::getPairState()
+{
+  return m_pm->getPairState(getServerInfo(m_uid));
 }
 
 PairState NvHTTP::getPairState(std::string serverInfo)
 {
-  return PairState::FAILED;
+  return m_pm->getPairState(serverInfo);
 }
 
 int NvHTTP::getCurrentGame(std::string serverInfo)
@@ -106,6 +125,7 @@ PairState NvHTTP::pair(std::string pin)
 
 std::string NvHTTP::openHttpConnection(std::string url, bool enableReadTimeout)
 {
+  isyslog("Opening url: %s", url.c_str());
   std::stringstream data;
 
   // watch the data coming into curl
@@ -116,7 +136,7 @@ std::string NvHTTP::openHttpConnection(std::string url, bool enableReadTimeout)
   try {
     m_curl.perform();
   }
-  catch (curl_easy_exception error) {
+  catch (curl_easy_exception & error) {
     error.print_traceback();
   }
 

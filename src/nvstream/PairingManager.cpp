@@ -201,7 +201,11 @@ PairState PairingManager::pair(std::string uid, std::string pin)
 
 PairState PairingManager::getPairState(std::string serverInfo)
 {
-  return PairState::FAILED;
+  if (m_http->getXmlString(serverInfo, "PairStatus") == "1")
+  {
+    return PairState::NOT_PAIRED;
+  }
+  return PairState::PAIRED;
 }
 
 std::string PairingManager::bytesToHex(unsigned char* in, unsigned len)
