@@ -37,6 +37,7 @@ set(MOONLIGHT_SOURCES src/addon.cpp
                       src/log/LogAddon.cpp
                       src/log/LogConsole.cpp
                       src/log/LogSyslog.cpp
+                      src/nvstream/CertKeyPair.cpp
                       src/nvstream/NvHTTP.cpp
                       src/nvstream/PairingManager.cpp
                       src/settings/Resolution.cpp
