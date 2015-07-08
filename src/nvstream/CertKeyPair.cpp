@@ -18,27 +18,57 @@
  *
  */
 #include "CertKeyPair.h"
+#include "log/Log.h"
 #include <openssl/pem.h>
 #include <openssl/conf.h>
 #include <openssl/pkcs12.h>
 
+#ifndef OPENSSL_NO_ENGINE
+#include <openssl/engine.h>
+#endif
+
 using namespace MOONLIGHT;
+
+namespace
+{
+	const int NUM_BITS =  2048;
+  const int SERIAL =    0;
+  const int NUM_YEARS = 10;
+}
 
 CertKeyPair::CertKeyPair()
 {
+	m_x509 = NULL;
+	m_pkey = NULL;
+	m_p12 = NULL;
 }
 
 CertKeyPair::~CertKeyPair()
 {
-
+  if (m_x509)
+    X509_free(m_x509);
+  if (m_pkey)
+    EVP_PKEY_free(m_pkey);
+  if (m_p12)
+    PKCS12_free(m_p12);
 }
 
-void CertKeyPair::generate()
+bool CertKeyPair::generate()
 {
-
+  return false;
 }
 
 void CertKeyPair::save(std::string certFile, std::string p12File, std::string keyPairFile)
 {
 
+}
+
+bool CertKeyPair::make_cert(int bits, int serial, int years)
+{
+  return false;
+}
+
+bool CertKeyPair::add_extension(int nid, char* value)
+{
+  return false;
 }

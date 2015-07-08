@@ -30,10 +30,12 @@ namespace MOONLIGHT
   public:
     CertKeyPair();
     virtual ~CertKeyPair();
-    void generate();
+    bool generate();
     void save(std::string certFile, std::string p12File, std::string keyPairFile);
   
   private:
+    bool make_cert(int bits, int serial, int years);
+    bool add_extension(int nid, char* value);
     X509*     m_x509;
     EVP_PKEY* m_pkey;
     PKCS12*   m_p12;
