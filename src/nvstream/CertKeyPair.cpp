@@ -87,7 +87,17 @@ bool CertKeyPair::generate()
 
 void CertKeyPair::save(std::string certFile, std::string p12File, std::string keyPairFile)
 {
-
+  FILE* certFilePtr = fopen(certFile.c_str(), "w");
+  FILE* keyPairFilePtr = fopen(keyPairFile.c_str(), "w");
+  FILE* p12FilePtr = fopen(p12File.c_str(), "wb");
+  
+  PEM_write_PrivateKey(keyPairFilePtr, m_pkey, NULL, NULL, 0, NULL, NULL);
+  PEM_write_X509(certFilePtr, m_x509);
+  i2d_PKCS12_fp(p12FilePtr, m_p12);
+  
+  fclose(p12FilePtr);
+  fclose(certFilePtr);
+  fclose(keyPairFilePtr);
 }
 
 bool CertKeyPair::make_cert(int bits, int serial, int years)
