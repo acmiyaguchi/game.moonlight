@@ -65,10 +65,63 @@ void CertKeyPair::save(std::string certFile, std::string p12File, std::string ke
 
 bool CertKeyPair::make_cert(int bits, int serial, int years)
 {
-  return false;
+  // Keep a temporary set in the case of failure
+  X509* x;
+  EVP_PKEY* pk;
+  RSA* rsa;
+  X509_NAME* name = NULL;
+
+  if (m_pkey == NULL) {
+    if ((pk=EVP_PKEY_new()) == NULL) {
+      return false;
+    }
+  }
+  else {
+    pk = m_pkey;
+  }
+
+  if (m_x509 == NULL) {
+    if ((x = X509_new()) == NULL) {
+      return false;
+    }
+  }
+  else {
+    x = m_x509;
+  }
+
+
+  rsa = RSA_generate_key(bits, RSA_F4, NULL, NULL);
+  if (!EVP_PKEY_assign_RSA(pk, rsa)) {
+    return false;
+  }
+
+  X509_set_version(x, 2);
+  ASN1_INTEGER_set(X509_get_serialNumber(x), serial);
+  X509_gmtime_adj(X509_get_notBefore(x), 0);
+  X509_gmtime_adj(X509_get_notAfter(x), (long)3600*24*365*years);
+  X509_set_pubkey(x, pk);
+
+  name = X509_get_subject_name(x);
+
+  X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (unsigned char*)"NVIDIA GameStream Client", -1, -1, 0);
+  X509_set_issuer_name(x, name);
+
+  // add various extensions
+  add_extension(x, NID_basic_constraints, "critical,CA:TRUE");
+  add_extension(x, NID_key_usage, "critical,keyCertSign,cRLSign");
+  add_extension(x, NID_subject_key_identifier, "hash");
+
+  if (!X509_sign(x, pk, EVP_sha1())) {
+    return false;
+  }
+
+  m_x509 = x;
+  m_pkey = pk;
+
+  return true;
 }
 
-bool CertKeyPair::add_extension(int nid, char* value)
+bool CertKeyPair::add_extension(X509* cert, int nid, const char* value)
 {
   return false;
 }

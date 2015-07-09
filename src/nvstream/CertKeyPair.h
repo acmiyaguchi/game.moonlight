@@ -35,7 +35,7 @@ namespace MOONLIGHT
   
   private:
     bool make_cert(int bits, int serial, int years);
-    bool add_extension(int nid, char* value);
+    bool add_extension(X509* cert, int nid, const char* value);
     X509*     m_x509;
     EVP_PKEY* m_pkey;
     PKCS12*   m_p12;
