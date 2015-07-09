@@ -123,5 +123,18 @@ bool CertKeyPair::make_cert(int bits, int serial, int years)
 
 bool CertKeyPair::add_extension(X509* cert, int nid, const char* value)
 {
-  return false;
+  X509_EXTENSION* ext;
+  X509V3_CTX ctx;
+  X509V3_set_ctx_nodb(&ctx);
+  X509V3_set_ctx(&ctx, cert, cert, NULL, NULL, 0);
+  
+  ext = X509V3_EXT_conf_nid(NULL, &ctx, nid, (char*)value);
+  if (!ext) {
+    return false;
+  }
+
+  X509_add_ext(cert, ext, -1);
+  X509_EXTENSION_free(ext);
+  
+  return true;
 }
