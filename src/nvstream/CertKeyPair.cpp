@@ -19,6 +19,8 @@
  */
 #include "CertKeyPair.h"
 #include "log/Log.h"
+#include <cstdio>
+#include <cstdlib>
 #include <openssl/pem.h>
 #include <openssl/conf.h>
 #include <openssl/pkcs12.h>
@@ -55,7 +57,32 @@ CertKeyPair::~CertKeyPair()
 
 bool CertKeyPair::generate()
 {
-  return false;
+  BIO* bio_err;
+
+  CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
+  bio_err = BIO_new_fp(stderr, BIO_NOCLOSE);
+
+  SSLeay_add_all_algorithms();
+  ERR_load_crypto_strings();
+
+  if (!make_cert(NUM_BITS, SERIAL, NUM_YEARS)){
+    return false;
+  }
+
+  m_p12 = PKCS12_create((char*)"limelight", (char*)"GameStream", m_pkey, m_x509, NULL, 0, 0, 0, 0, 0);
+  if (m_p12 == NULL) {
+    esyslog("Error generating a valid PKCS12 certificate.\n");
+  }
+
+  #ifndef OPENSSL_NO_ENGINE
+    ENGINE_cleanup();
+  #endif
+    CRYPTO_cleanup_all_ex_data();
+
+    CRYPTO_mem_leaks(bio_err);
+    BIO_free(bio_err);
+
+  return true;
 }
 
 void CertKeyPair::save(std::string certFile, std::string p12File, std::string keyPairFile)
