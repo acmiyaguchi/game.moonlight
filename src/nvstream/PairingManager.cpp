@@ -25,6 +25,7 @@
 #include <iomanip>
 #include <cstring>
 #include <cstdlib>
+#include <ctime>
 #include <openssl/sha.h>
 #include <openssl/aes.h>
 #include <openssl/rand.h>
@@ -309,3 +310,12 @@ std::vector<unsigned char> PairingManager::signData(
   return signature;
 }
 
+std::string PairingManager::generatePinString()
+{
+  srand(time(NULL));
+  std::stringstream ss;
+  for (int i=0; i < 4; i++) {
+    ss << rand() % 10;
+  }
+  return ss.str();
+}

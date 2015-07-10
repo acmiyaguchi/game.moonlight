@@ -40,6 +40,7 @@ namespace MOONLIGHT
     PairingManager(NvHTTP* http);
     PairState pair(std::string uid, std::string pin);
     PairState getPairState(std::string serverInfo);
+    static std::string generatePinString();
   private:
     std::string bytesToHex(unsigned char* in, unsigned len);
     std::vector<unsigned char> hexToBytes(std::string s);

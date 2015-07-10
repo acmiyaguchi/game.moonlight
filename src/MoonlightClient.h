@@ -20,6 +20,7 @@
 #pragma once
 
 #include "Limelight.h"
+#include <string>
 
 namespace MOONLIGHT
 {
@@ -28,6 +29,6 @@ namespace MOONLIGHT
   public:
     void start();
     void stop();
-    void pair();
+    void pair(std::string uid, std::string host);
   };
 }
