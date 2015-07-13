@@ -45,6 +45,7 @@ CertKeyPair::CertKeyPair(std::string certFile, std::string p12File, std::string 
 	m_x509 = NULL;
 	m_pkey = NULL;
 	m_p12 = NULL;
+	this->loadCert();
 }
 
 CertKeyPair::~CertKeyPair()
@@ -208,4 +209,37 @@ std::vector<unsigned char> CertKeyPair::getCertBytes(std::string certFile)
   std::basic_ifstream<unsigned char> file(certFile, std::ios::binary);
   return std::vector<unsigned char>((std::istreambuf_iterator<unsigned char>(file)),
                                      std::istreambuf_iterator<unsigned char>());
+}
+
+bool CertKeyPair::loadCert()
+{
+  FILE* fd = fopen(m_cert_path.c_str(), "r");
+  if (fd == NULL)
+  {
+    isyslog("Generating certificate...");
+    this->generate();
+    this->save();
+    isyslog("done\n");
+    fd = fopen(m_cert_path.c_str(), "r");
+  }
+  if (fd == NULL)
+  {
+    esyslog("Can't open certificate file\n");
+    return false;
+  }
+
+  if (!(m_x509 = PEM_read_X509(fd, NULL, NULL, NULL)))
+  {
+    esyslog("Error reading certificate into memory.");
+    m_x509 = NULL;
+    return false;
+  }
+
+  fd = fopen(m_pkey_path.c_str(), "r");
+  PEM_read_PrivateKey(fd, &m_pkey, NULL, NULL);
+  fclose(fd);
+
+  isyslog("Successfully loaded certificates.\n");
+  return true;
+
 }

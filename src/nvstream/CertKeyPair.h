@@ -39,6 +39,7 @@ namespace MOONLIGHT
     std::vector<unsigned char> getCertBytes();
 
   private:
+    bool loadCert();
     void save(std::string certFile, std::string p12File, std::string keyPairFile);
     std::vector<unsigned char> getCertBytes(std::string certFile);
     bool make_cert(int bits, int serial, int years);
