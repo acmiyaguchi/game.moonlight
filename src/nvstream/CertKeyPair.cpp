@@ -19,6 +19,7 @@
  */
 #include "CertKeyPair.h"
 #include "log/Log.h"
+#include <fstream>
 #include <cstdio>
 #include <cstdlib>
 #include <openssl/pem.h>
@@ -38,7 +39,8 @@ namespace
   const int NUM_YEARS = 10;
 }
 
-CertKeyPair::CertKeyPair()
+CertKeyPair::CertKeyPair(std::string certFile, std::string p12File, std::string keyPairFile)
+  : m_cert_path(certFile), m_p12_path(p12File), m_pkey_path(keyPairFile)
 {
 	m_x509 = NULL;
 	m_pkey = NULL;
@@ -85,19 +87,24 @@ bool CertKeyPair::generate()
   return true;
 }
 
+void CertKeyPair::save()
+{
+  save(m_cert_path, m_p12_path, m_pkey_path);
+}
+
 void CertKeyPair::save(std::string certFile, std::string p12File, std::string keyPairFile)
 {
   FILE* certFilePtr = fopen(certFile.c_str(), "w");
   FILE* keyPairFilePtr = fopen(keyPairFile.c_str(), "w");
   FILE* p12FilePtr = fopen(p12File.c_str(), "wb");
-  
-  PEM_write_PrivateKey(keyPairFilePtr, m_pkey, NULL, NULL, 0, NULL, NULL);
+
   PEM_write_X509(certFilePtr, m_x509);
+  PEM_write_PrivateKey(keyPairFilePtr, m_pkey, NULL, NULL, 0, NULL, NULL);
   i2d_PKCS12_fp(p12FilePtr, m_p12);
   
-  fclose(p12FilePtr);
   fclose(certFilePtr);
   fclose(keyPairFilePtr);
+  fclose(p12FilePtr);
 }
 
 bool CertKeyPair::make_cert(int bits, int serial, int years)
@@ -174,4 +181,31 @@ bool CertKeyPair::add_extension(X509* cert, int nid, const char* value)
   X509_EXTENSION_free(ext);
   
   return true;
+}
+
+X509* CertKeyPair::getX509()
+{
+  return m_x509;
+}
+
+EVP_PKEY* CertKeyPair::getPrivateKey()
+{
+  return m_pkey;
+}
+
+PKCS12* CertKeyPair::getP12()
+{
+  return m_p12;
+}
+
+std::vector<unsigned char> CertKeyPair::getCertBytes()
+{
+  return getCertBytes(m_cert_path);
+}
+
+std::vector<unsigned char> CertKeyPair::getCertBytes(std::string certFile)
+{
+  std::basic_ifstream<unsigned char> file(certFile, std::ios::binary);
+  return std::vector<unsigned char>((std::istreambuf_iterator<unsigned char>(file)),
+                                     std::istreambuf_iterator<unsigned char>());
 }

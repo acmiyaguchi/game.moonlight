@@ -20,6 +20,7 @@
 #include "PairingManager.h"
 #include "log/Log.h"
 #include "NvHTTP.h"
+#include "CertKeyPair.h"
 #include <sstream>
 #include <algorithm>
 #include <iomanip>
@@ -34,11 +35,9 @@
 
 using namespace MOONLIGHT;
 
-PairingManager::PairingManager(NvHTTP* http)
-    : m_http(http)
+PairingManager::PairingManager(NvHTTP* http, CertKeyPair* cert)
+    : m_http(http), m_cert(cert)
 {
-  m_cert = NULL;
-  m_private_key = NULL;
 }
 
 PairState PairingManager::pair(std::string uid, std::string pin)
@@ -58,11 +57,13 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   SHA1(salted_pin.data(), 20, aes_key_hash.data());
   AES_set_encrypt_key(aes_key_hash.data(), 128, &aes_key);
 
+  std::vector<unsigned char> cert_bytes = m_cert->getCertBytes();
+
   // Send the salt and get the server cert.
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&phrase=getservercert&salt="
       << bytesToHex(salt.data(), salt.size()) << "&clientcert="
-      << bytesToHex(m_cert_bytes.data(), m_cert_bytes.size());
+      << bytesToHex(cert_bytes.data(), cert_bytes.size());
   std::string get_cert = m_http->openHttpConnection(url.str(), false);
   url.str("");
 
@@ -114,7 +115,7 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   std::array<unsigned char, 32> challenge_resp_hash;
   std::array<unsigned char, 32> challenge_resp_encrypted;
   std::copy_n(dec_challenge_resp.begin() + 20, 16, server_challenge.begin());
-  std::memcpy(server_challenge.data() + 16, m_cert->signature->data, 256);
+  std::memcpy(server_challenge.data() + 16, m_cert->getX509()->signature->data, 256);
   std::copy(client_secret.begin(), client_secret.end(),
       server_response.begin() + 16 + 256);
   SHA1(server_challenge.data(), server_challenge.size(),
@@ -147,7 +148,7 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   std::vector<unsigned char> server_signature(256);
   std::copy_n(server_secret_resp.begin() + 16, 256, server_signature.begin());
 
-  if (!verifySignature(server_secret, server_signature, m_private_key))
+  if (!verifySignature(server_secret, server_signature, m_cert->getPrivateKey()))
   {
     url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
     m_http->openHttpConnection(url.str(), true);
@@ -169,7 +170,7 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   std::copy(client_secret.begin(), client_secret.end(),
       client_pairing_secret.begin());
   std::vector<unsigned char> signed_data = signData(client_secret,
-      m_private_key);
+      m_cert->getPrivateKey());
   std::copy(signed_data.begin(), signed_data.end(),
       client_pairing_secret.begin() + 16);
 

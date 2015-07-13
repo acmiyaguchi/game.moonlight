@@ -19,6 +19,7 @@
  */
 #include "NvHTTP.h"
 #include "log/Log.h"
+#include "CertKeyPair.h"
 #include "PairingManager.h"
 #include <sstream>
 #include <tinyxml.h>
@@ -28,8 +29,9 @@ using curl::curl_easy;
 
 namespace
 {
-  const char *pCertFile = "./client.pem";
-  const char *pKeyFile = "./key.pem";
+  std::string certFileName = "client.pem";
+  std::string p12FileName = "client.p12";
+  std::string keyFileName = "key.pem";
   const int HTTPS_PORT = 47984;
   const int HTTP_PORT = 47989;
   const int CONNECTION_TIMEOUT = 3000;
@@ -47,15 +49,16 @@ NvHTTP::NvHTTP(const char* host, std::string uid) :
   ss << "http://" << host << ":" << HTTP_PORT;
   baseUrlHttp = ss.str();
 
-  m_pm = new PairingManager(this);
+  m_cert = new CertKeyPair(certFileName, p12FileName, keyFileName);
+  m_pm = new PairingManager(this, m_cert);
 
   // Options for curl
   m_curl.add(curl_pair<CURLoption, long>(CURLOPT_SSL_VERIFYHOST, 0L));
   m_curl.add(curl_pair<CURLoption, long>(CURLOPT_SSLENGINE_DEFAULT, 1L));
   m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLCERTTYPE, "PEM"));
-  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLCERT, pCertFile));
+  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLCERT, certFileName.c_str()));
   m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLKEYTYPE, "PEM"));
-  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLKEY, pKeyFile));
+  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLKEY, keyFileName.c_str()));
   m_curl.add(curl_pair<CURLoption, long>(CURLOPT_SSL_VERIFYPEER, 0L));
   m_curl.add(curl_pair<CURLoption, long>(CURLOPT_FAILONERROR, 1L));
 }
@@ -63,6 +66,7 @@ NvHTTP::NvHTTP(const char* host, std::string uid) :
 NvHTTP::~NvHTTP()
 {
   delete m_pm;
+  delete m_cert;
 }
 
 std::string NvHTTP::getXmlString(std::string str, std::string tagname)

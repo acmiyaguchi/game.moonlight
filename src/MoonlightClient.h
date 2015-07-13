@@ -27,8 +27,11 @@ namespace MOONLIGHT
   class CMoonlightClient
   {
   public:
+    CMoonlightClient();
     void start();
     void stop();
     void pair(std::string uid, std::string host);
+  private:
+    void init();
   };
 }

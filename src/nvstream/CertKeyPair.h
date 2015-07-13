@@ -22,20 +22,30 @@
 #include <openssl/x509v3.h>
 #include <openssl/pkcs12.h>
 #include <string>
+#include <vector>
 
 namespace MOONLIGHT
 {
   class CertKeyPair
   {
   public:
-    CertKeyPair();
+    CertKeyPair(std::string certFile, std::string p12File, std::string keyPairFile);
     virtual ~CertKeyPair();
     bool generate();
-    void save(std::string certFile, std::string p12File, std::string keyPairFile);
-  
+    void save();
+    X509* getX509();
+    EVP_PKEY* getPrivateKey();
+    PKCS12* getP12();
+    std::vector<unsigned char> getCertBytes();
+
   private:
+    void save(std::string certFile, std::string p12File, std::string keyPairFile);
+    std::vector<unsigned char> getCertBytes(std::string certFile);
     bool make_cert(int bits, int serial, int years);
     bool add_extension(X509* cert, int nid, const char* value);
+    std::string m_cert_path;
+    std::string m_pkey_path;
+    std::string m_p12_path;
     X509*     m_x509;
     EVP_PKEY* m_pkey;
     PKCS12*   m_p12;

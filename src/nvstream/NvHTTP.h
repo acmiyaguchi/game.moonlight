@@ -26,6 +26,7 @@
 namespace MOONLIGHT
 {
   class PairingManager;
+  class CertKeyPair;
 
   class NvHTTP
   {
@@ -54,6 +55,7 @@ namespace MOONLIGHT
     std::string baseUrlHttp;
   private:
     PairingManager* m_pm;
+    CertKeyPair*    m_cert;
     std::string     m_uid;
     curl::curl_easy m_curl;
   };

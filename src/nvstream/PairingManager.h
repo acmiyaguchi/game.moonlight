@@ -33,11 +33,12 @@ namespace MOONLIGHT
   };
 
   class NvHTTP;
+  class CertKeyPair;
 
   class PairingManager
   {
   public:
-    PairingManager(NvHTTP* http);
+    PairingManager(NvHTTP* http, CertKeyPair* cert);
     PairState pair(std::string uid, std::string pin);
     PairState getPairState(std::string serverInfo);
     static std::string generatePinString();
@@ -48,8 +49,6 @@ namespace MOONLIGHT
     std::vector<unsigned char> signData(std::vector<unsigned char> data, EVP_PKEY *pkey);
 
     NvHTTP* m_http;
-    std::array<unsigned char, 4096> m_cert_bytes;
-    X509* m_cert;
-    EVP_PKEY* m_private_key;
+    CertKeyPair* m_cert;
   };
 }

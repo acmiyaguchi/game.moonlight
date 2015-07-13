@@ -25,6 +25,11 @@
 
 using namespace MOONLIGHT;
 
+CMoonlightClient::CMoonlightClient()
+{
+
+}
+
 void CMoonlightClient::start()
 {
   std::string host = "192.168.1.85"; //192.168.1.85
@@ -36,7 +41,8 @@ void CMoonlightClient::start()
   config.packetSize = 1024;
 
   isyslog("CMoonlightClient::start: Starting moonlight");
-  LiStartConnection(host.c_str(), &config, NULL, NULL, NULL, NULL, NULL, 0, 0);
+  //LiStartConnection(host.c_str(), &config, NULL, NULL, NULL, NULL, NULL, 0, 0);
+
 }
 
 void CMoonlightClient::stop()
@@ -49,4 +55,9 @@ void CMoonlightClient::pair(std::string uid, std::string host)
   NvHTTP http(host.c_str(), uid);
   std::string pin = PairingManager::generatePinString();
   isyslog("Pin to pair: %s\n", pin.c_str());
+}
+
+void CMoonlightClient::init()
+{
+
 }
