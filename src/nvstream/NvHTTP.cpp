@@ -24,10 +24,9 @@
 #include <sstream>
 #include <fstream>
 #include "pugixml.hpp"
-#include <locale>
+#include "http.h"
 
 using namespace MOONLIGHT;
-using curl::curl_easy;
 
 namespace
 {
@@ -53,16 +52,7 @@ NvHTTP::NvHTTP(const char* host, std::string uid) :
 
   m_cert = new CertKeyPair(certFileName, p12FileName, keyFileName);
   m_pm = new PairingManager(this, m_cert);
-
-  // Options for curl
-  m_curl.add(curl_pair<CURLoption, long>(CURLOPT_SSL_VERIFYHOST, 0L));
-  m_curl.add(curl_pair<CURLoption, long>(CURLOPT_SSLENGINE_DEFAULT, 1L));
-  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLCERTTYPE, "PEM"));
-  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLCERT, certFileName.c_str()));
-  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLKEYTYPE, "PEM"));
-  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_SSLKEY, keyFileName.c_str()));
-  m_curl.add(curl_pair<CURLoption, long>(CURLOPT_SSL_VERIFYPEER, 0L));
-  m_curl.add(curl_pair<CURLoption, long>(CURLOPT_FAILONERROR, 1L));
+  http_init();
 }
 
 NvHTTP::~NvHTTP()
@@ -75,17 +65,15 @@ std::string NvHTTP::getXmlString(std::string str, std::string tagname)
 {
   pugi::xml_document doc;
   pugi::xml_parse_result result = doc.load_buffer(str.c_str(),str.size(), pugi::parse_default, pugi::encoding_auto);
-  if(result) {
-    isyslog("Properly parsed");
-  }
-  else {
+  if(!result) {
     esyslog("Did not properly load xml\n");
     return "";
   }
 
-  for (auto tool = doc.child("root"); tool; tool.next_sibling())
-  {
-    isyslog("Name: %s Value: %s\n", tool.name(), tool.value());
+  pugi::xml_node node = doc.child("root").child(tagname.c_str());
+  if(node) {
+    isyslog("%s found with value %s", tagname.c_str(), node.child_value());
+    return std::string(node.child_value());
   }
 
   return "";
@@ -106,7 +94,7 @@ std::string NvHTTP::getServerInfo(std::string uid)
 
 std::string NvHTTP::getServerVersion(std::string serverInfo)
 {
-  getXmlString(serverInfo, "appversion");
+  return getXmlString(serverInfo, "appversion");
 }
 
 PairState NvHTTP::getPairState()
@@ -131,21 +119,12 @@ PairState NvHTTP::pair(std::string pin)
 
 std::string NvHTTP::openHttpConnection(std::string url, bool enableReadTimeout)
 {
-  isyslog("Opening url: %s", url.c_str());
-  std::stringstream data;
-
-  // watch the data coming into curl
-  curl_writer writer(data);
-  curl_writer easy(writer);
-
-  m_curl.add(curl_pair<CURLoption, string>(CURLOPT_URL, url));
-  try {
-    m_curl.perform();
-  }
-  catch (curl_easy_exception & error) {
-    error.print_traceback();
-  }
-
-  return data.str();
+  isyslog("Opening connection to %s", url.c_str());
+  std::stringstream ss;
+  http_data* data = http_create_data();
+  http_request((char*)url.c_str(), data);
+  ss.write(data->memory, data->size);
+  http_free_data(data);
+  return ss.str();
 }
 

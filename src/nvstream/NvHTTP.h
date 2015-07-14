@@ -21,7 +21,6 @@
 
 #include "PairingManager.h"
 #include <string>
-#include "curl_easy.h"
 
 namespace MOONLIGHT
 {
@@ -57,6 +56,5 @@ namespace MOONLIGHT
     PairingManager* m_pm;
     CertKeyPair*    m_cert;
     std::string     m_uid;
-    curl::curl_easy m_curl;
   };
 }

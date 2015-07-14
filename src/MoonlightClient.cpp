@@ -21,6 +21,7 @@
 #include "log/Log.h"
 #include "nvstream/NvHTTP.h"
 #include "nvstream/PairingManager.h"
+#include "settings/Preferences.h"
 #include <stddef.h>
 
 using namespace MOONLIGHT;
@@ -32,15 +33,17 @@ CMoonlightClient::CMoonlightClient()
 
 void CMoonlightClient::start()
 {
-  std::string host = "192.168.1.85"; //192.168.1.85
+  std::string host = "10.0.0.7"; //192.168.1.85
   STREAM_CONFIGURATION config;
   config.width = 800;
   config.height = 600;
   config.fps = 60;
   config.bitrate = 1024;
   config.packetSize = 1024;
+  Preferences prefs;
 
   isyslog("CMoonlightClient::start: Starting moonlight");
+  pair(prefs.getUniqueId(), host);
   //LiStartConnection(host.c_str(), &config, NULL, NULL, NULL, NULL, NULL, 0, 0);
 
 }
@@ -50,11 +53,16 @@ void CMoonlightClient::stop()
   LiStopConnection();
 }
 
+#include <fstream>
+
 void CMoonlightClient::pair(std::string uid, std::string host)
 {
   NvHTTP http(host.c_str(), uid);
   std::string pin = PairingManager::generatePinString();
   isyslog("Pin to pair: %s\n", pin.c_str());
+  std::string resp = http.getServerInfo(uid);
+  resp = http.getServerVersion(resp);
+  isyslog("%s\n", resp.c_str());
 }
 
 void CMoonlightClient::init()
