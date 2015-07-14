@@ -29,8 +29,7 @@ list(APPEND DEPLIBS ${kodiplatform_LIBRARIES}
                     ${CURL_LIBRARIES}
                     moonlight)
 
-set(MOONLIGHT_SOURCES src/addon.cpp
-                      src/MoonlightClient.cpp
+set(MOONLIGHT_SOURCES src/MoonlightClient.cpp
                       src/log/Log.cpp
                       src/log/LogAddon.cpp
                       src/log/LogConsole.cpp
@@ -43,6 +42,14 @@ set(MOONLIGHT_SOURCES src/addon.cpp
                       src/settings/Preferences.cpp
                       lib/pugixml/src/pugixml.cpp)
 
-build_addon(game.moonlight MOONLIGHT DEPLIBS)
+set(STANDALONE_SOURCES src/main.cpp)
+set(ADDON_SOURCES src/addon.cpp)
+
+# build standalone
+add_executable(moonlight_client ${MOONLIGHT_SOURCES} ${STANDALONE_SOURCES})
+target_link_libraries(moonlight_client ${DEPLIBS})
+
+# build addon
+build_addon(game.moonlight MOONLIGHT ${ADDON_SOURCES} DEPLIBS)
 
 include(CPack)

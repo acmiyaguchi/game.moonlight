@@ -40,11 +40,9 @@ void CMoonlightClient::start()
   config.fps = 60;
   config.bitrate = 1024;
   config.packetSize = 1024;
-  Preferences prefs;
 
   isyslog("CMoonlightClient::start: Starting moonlight");
-  pair(prefs.getUniqueId(), host);
-  //LiStartConnection(host.c_str(), &config, NULL, NULL, NULL, NULL, NULL, 0, 0);
+  LiStartConnection(host.c_str(), &config, NULL, NULL, NULL, NULL, NULL, 0, 0);
 
 }
 
