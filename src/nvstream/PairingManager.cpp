@@ -221,7 +221,7 @@ std::string PairingManager::bytesToHex(unsigned char* in, unsigned len)
   return ss.str();
 }
 
-std::vector<unsigned char> hexToBytes(std::string s)
+std::vector<unsigned char> PairingManager::hexToBytes(std::string s)
 {
   int len = s.length();
   std::vector<unsigned char> data(len / 2);
