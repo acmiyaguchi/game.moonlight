@@ -22,7 +22,9 @@
 #include "CertKeyPair.h"
 #include "PairingManager.h"
 #include <sstream>
-#include <tinyxml.h>
+#include <fstream>
+#include "pugixml.hpp"
+#include <locale>
 
 using namespace MOONLIGHT;
 using curl::curl_easy;
@@ -71,22 +73,22 @@ NvHTTP::~NvHTTP()
 
 std::string NvHTTP::getXmlString(std::string str, std::string tagname)
 {
-  TiXmlDocument doc;
-  doc.Parse(str.c_str(), 0, TIXML_ENCODING_UTF8);
-
-  TiXmlElement* child = doc.FirstChild("root")->ToElement();
-
-  const char* attribute;
-  for (; child; child = child->NextSiblingElement())
-  {
-    attribute = child->Attribute(tagname.c_str());
-    if (attribute)
-    {
-      break;
-    }
+  pugi::xml_document doc;
+  pugi::xml_parse_result result = doc.load_buffer(str.c_str(),str.size(), pugi::parse_default, pugi::encoding_auto);
+  if(result) {
+    isyslog("Properly parsed");
   }
-  std::string ret(attribute);
-  return ret;
+  else {
+    esyslog("Did not properly load xml\n");
+    return "";
+  }
+
+  for (auto tool = doc.child("root"); tool; tool.next_sibling())
+  {
+    isyslog("Name: %s Value: %s\n", tool.name(), tool.value());
+  }
+
+  return "";
 }
 
 std::string NvHTTP::getServerInfo(std::string uid)
@@ -146,3 +148,4 @@ std::string NvHTTP::openHttpConnection(std::string url, bool enableReadTimeout)
 
   return data.str();
 }
+
