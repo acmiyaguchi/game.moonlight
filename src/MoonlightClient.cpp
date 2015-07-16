@@ -56,11 +56,25 @@ void CMoonlightClient::stop()
 void CMoonlightClient::pair(std::string uid, std::string host)
 {
   NvHTTP http(host.c_str(), uid);
+
   std::string pin = PairingManager::generatePinString();
   isyslog("Pin to pair: %s\n", pin.c_str());
-  std::string resp = http.getServerInfo(uid);
-  resp = http.getServerVersion(resp);
-  isyslog("%s\n", resp.c_str());
+
+  PairState pair_state = http.pair(pin);
+  std::string message;
+  switch(pair_state)
+  {
+  case PairState::PIN_WRONG:
+    message = "Incorrect PIN";
+    break;
+  case PairState::FAILED:
+    message = "Pairing failed";
+    break;
+  case PairState::PAIRED:
+    message = "Paired successfully";
+    break;
+  }
+  isyslog("%s", message.c_str());
 }
 
 void CMoonlightClient::init()
