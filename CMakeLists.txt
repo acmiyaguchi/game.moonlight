@@ -35,6 +35,7 @@ set(MOONLIGHT_SOURCES src/MoonlightClient.cpp
                       src/log/LogConsole.cpp
                       src/log/LogSyslog.cpp
                       src/nvstream/CertKeyPair.cpp
+                      src/nvstream/NvApp.cpp
                       src/nvstream/NvHTTP.cpp
                       src/nvstream/PairingManager.cpp
                       src/nvstream/http.c
