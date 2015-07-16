@@ -42,6 +42,7 @@ PairingManager::PairingManager(NvHTTP* http, CertKeyPair* cert)
 
 PairState PairingManager::pair(std::string uid, std::string pin)
 {
+  isyslog("Pairing with uid: %s and pin: %s", uid.c_str(), pin.c_str());
   std::stringstream url;
 
   std::array<unsigned char, 16> salt;
@@ -58,8 +59,8 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   AES_set_encrypt_key(aes_key_hash.data(), 128, &aes_key);
 
   std::vector<unsigned char> cert_bytes = m_cert->getCertBytes();
-
   // Send the salt and get the server cert.
+  isyslog("Sending salt and getting server certificate");
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&phrase=getservercert&salt="
       << bytesToHex(salt.data(), salt.size()) << "&clientcert="
@@ -81,6 +82,7 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   AES_encrypt(random_challenge.data(), encrypted_challenge.data(), &aes_key);
 
   // send the encrypted challenge to the server
+  isyslog("Sending encrypted challenge to the server");
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&clientchallenge="
       << bytesToHex(encrypted_challenge.data(), encrypted_challenge.size());
@@ -127,6 +129,7 @@ PairState PairingManager::pair(std::string uid, std::string pin)
         &challenge_resp_encrypted.data()[i], &aes_key);
   }
 
+  isyslog("Getting the server's signed secret");
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&serverchallengeresp="
       << bytesToHex(challenge_resp_encrypted.data(),
@@ -174,6 +177,7 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   std::copy(signed_data.begin(), signed_data.end(),
       client_pairing_secret.begin() + 16);
 
+  isyslog("Sending the server the client's signed secret");
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&clientpairingsecret="
       << bytesToHex(&client_pairing_secret[0], client_pairing_secret.size());
@@ -187,6 +191,7 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   }
 
   //do initial challenges
+  isyslog("Do the intial challenged");
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&phrase=pairchallenge";
   std::string pair_challenge = m_http->openHttpConnection(url.str(), true);
@@ -198,6 +203,7 @@ PairState PairingManager::pair(std::string uid, std::string pin)
     return PairState::FAILED;
   }
 
+  isyslog("Paired successfully");
   return PairState::PAIRED;
 }
 
