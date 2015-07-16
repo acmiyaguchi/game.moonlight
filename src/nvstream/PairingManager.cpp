@@ -65,10 +65,10 @@ PairState PairingManager::pair(std::string uid, std::string pin)
       << "&devicename=roth&updateState=1&phrase=getservercert&salt="
       << bytesToHex(salt.data(), salt.size()) << "&clientcert="
       << bytesToHex(cert_bytes.data(), cert_bytes.size());
-  std::string get_cert = m_http->openHttpConnection(url.str(), false);
+  std::string resp = m_http->openHttpConnection(url.str(), false);
   url.str("");
 
-  if (m_http->getXmlString(get_cert, "paired") != "1")
+  if (m_http->getXmlString(resp, "paired") != "1")
   {
     url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
     m_http->openHttpConnection(url.str(), true);
@@ -86,10 +86,10 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&clientchallenge="
       << bytesToHex(encrypted_challenge.data(), encrypted_challenge.size());
-  std::string challenge_resp = m_http->openHttpConnection(url.str(), true);
+  resp = m_http->openHttpConnection(url.str(), true);
   url.str("");
 
-  if (m_http->getXmlString(challenge_resp, "paired") != "1")
+  if (m_http->getXmlString(resp, "paired") != "1")
   {
     url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
     m_http->openHttpConnection(url.str(), true);
@@ -98,8 +98,9 @@ PairState PairingManager::pair(std::string uid, std::string pin)
 
   // decode the server response and subsequent challenge
   std::vector<unsigned char> enc_challenge_resp = hexToBytes(
-      m_http->getXmlString(challenge_resp, "challengeresponse"));
-  std::vector<unsigned char> dec_challenge_resp(enc_challenge_resp.size());
+      m_http->getXmlString(resp, "challengeresponse"));
+  std::vector<unsigned char> dec_challenge_resp;
+  dec_challenge_resp.resize(enc_challenge_resp.size());
 
   for (int i = 0; i < 48; i += 16)
   {
@@ -107,11 +108,13 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   }
 
   // compute the challenge response hash
-  std::vector<unsigned char> client_secret(16);
+  std::vector<unsigned char> client_secret;
+  client_secret.resize(16);
   RAND_bytes(client_secret.data(), client_secret.size());
 
-  std::vector<unsigned char> server_response(dec_challenge_resp.begin(),
-      server_response.begin() + 20);
+  std::vector<unsigned char> server_response;
+  server_response.resize(20);
+  std::copy_n(dec_challenge_resp.begin(), 20, server_response.begin());
 
   std::array<unsigned char, 16 + 256 + 16> server_challenge;
   std::array<unsigned char, 32> challenge_resp_hash;
@@ -134,9 +137,9 @@ PairState PairingManager::pair(std::string uid, std::string pin)
       << "&devicename=roth&updateState=1&serverchallengeresp="
       << bytesToHex(challenge_resp_encrypted.data(),
           challenge_resp_encrypted.size());
-  std::string secret_resp = m_http->openHttpConnection(url.str(), true);
+  resp = m_http->openHttpConnection(url.str(), true);
   url.str("");
-  if (m_http->getXmlString(secret_resp, "paired") != "1")
+  if (m_http->getXmlString(resp, "paired") != "1")
   {
     url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
     m_http->openHttpConnection(url.str(), true);
@@ -144,7 +147,7 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   }
 
   std::vector<unsigned char> server_secret_resp = hexToBytes(
-      m_http->getXmlString(secret_resp, "pairingsecret"));
+      m_http->getXmlString(resp, "pairingsecret"));
   // get the servers signed secret
   std::vector<unsigned char> server_secret(16);
   std::copy_n(server_secret_resp.begin(), 16, server_secret.begin());
@@ -181,9 +184,9 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&clientpairingsecret="
       << bytesToHex(&client_pairing_secret[0], client_pairing_secret.size());
-  std::string client_secret_resp = m_http->openHttpConnection(url.str(), true);
+  resp = m_http->openHttpConnection(url.str(), true);
   url.str("");
-  if (m_http->getXmlString(client_secret_resp, "paired") != "1")
+  if (m_http->getXmlString(resp, "paired") != "1")
   {
     url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
     m_http->openHttpConnection(url.str(), true);
@@ -194,9 +197,9 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   isyslog("Do the intial challenged");
   url << m_http->baseUrlHttps << "/pair?uniqueid=" << uid
       << "&devicename=roth&updateState=1&phrase=pairchallenge";
-  std::string pair_challenge = m_http->openHttpConnection(url.str(), true);
+  resp = m_http->openHttpConnection(url.str(), true);
   url.str("");
-  if (m_http->getXmlString(pair_challenge, "paired") != "1")
+  if (m_http->getXmlString(resp, "paired") != "1")
   {
     url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
     m_http->openHttpConnection(url.str(), true);

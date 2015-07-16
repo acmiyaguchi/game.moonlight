@@ -207,13 +207,14 @@ std::vector<unsigned char> CertKeyPair::getCertBytes()
 std::vector<unsigned char> CertKeyPair::getCertBytes(std::string certFile)
 {
   std::vector<unsigned char> vec;
-  std::ifstream file(certFile, std::ios::binary);
+  std::ifstream file(certFile);
   file.seekg(0, std::ios::end);
   std::streampos length(file.tellg());
   if(length) {
+    size_t size = static_cast<size_t>(length);
     file.seekg(0, std::ios::beg);
-    vec.reserve(length);
-    file.read((char*)(&vec[0]), static_cast<size_t>(length));
+    vec.resize(size);
+    file.read((char*)(&vec[0]), size);
   }
   return vec;
 }
