@@ -44,6 +44,8 @@ namespace MOONLIGHT
 
     PairState getPairState(std::string serverInfo);
 
+    std::string getAppListRaw();
+
     int getCurrentGame(std::string serverInfo);
 
     PairState pair(std::string pin);

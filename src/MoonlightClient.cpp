@@ -55,26 +55,42 @@ void CMoonlightClient::stop()
 
 void CMoonlightClient::pair(std::string uid, std::string host)
 {
-  NvHTTP http(host.c_str(), uid);
-
-  std::string pin = PairingManager::generatePinString();
-  isyslog("Pin to pair: %s\n", pin.c_str());
-
-  PairState pair_state = http.pair(pin);
   std::string message;
-  switch(pair_state)
+  NvHTTP http(host.c_str(), uid);
+  std::string serverInfo = http.getServerInfo(uid);
+  if (http.getPairState(serverInfo) == PairState::PAIRED)
   {
-  case PairState::PIN_WRONG:
-    message = "Incorrect PIN";
-    break;
-  case PairState::FAILED:
-    message = "Pairing failed";
-    break;
-  case PairState::PAIRED:
-    message = "Paired successfully";
-    break;
+    message = "Already paired";
+  }
+  else
+  {
+    std::string pin = PairingManager::generatePinString();
+    isyslog("Pin to pair: %s\n", pin.c_str());
+
+    PairState pair_state = http.pair(pin);
+    switch (pair_state)
+    {
+    case PairState::PIN_WRONG:
+      message = "Incorrect PIN";
+      break;
+    case PairState::FAILED:
+      message = "Pairing failed";
+      break;
+    case PairState::PAIRED:
+      message = "Paired successfully";
+      break;
+    }
   }
   isyslog("%s", message.c_str());
+
+  if (http.getPairState(serverInfo) == PairState::PAIRED)
+  {
+    std::string apps = http.getAppListRaw();
+    isyslog("Applist: %s", apps.c_str());
+  }
+  else {
+    isyslog("Lies, you didn't actually pair.");
+  }
 }
 
 void CMoonlightClient::init()

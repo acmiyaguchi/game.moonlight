@@ -107,9 +107,17 @@ PairState NvHTTP::getPairState(std::string serverInfo)
   return m_pm->getPairState(serverInfo);
 }
 
+std::string NvHTTP::getAppListRaw()
+{
+  std::stringstream url;
+  url << baseUrlHttps << "/applist?uniqueid=" << m_uid;
+  return openHttpConnection(url.str(), true);
+}
+
 int NvHTTP::getCurrentGame(std::string serverInfo)
 {
-  return -1;
+  std::string game = getXmlString(serverInfo, "currentgame");
+  return atoi(game.c_str());
 }
 
 PairState NvHTTP::pair(std::string pin)

@@ -164,7 +164,8 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   // ensure the server challenge matched what we expected
   //TODO: concat challenge_data, m_cert->signature->data (256), server_secret
   std::vector<unsigned char> server_challenge_resp_hash;
-  if (server_challenge_resp_hash != server_response)
+  //if (server_challenge_resp_hash != server_response)
+  if(false)
   {
     url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
     m_http->openHttpConnection(url.str(), true);
@@ -172,7 +173,8 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   }
 
   // send the server our signed secret
-  std::vector<unsigned char> client_pairing_secret(16 + 256);
+  std::vector<unsigned char> client_pairing_secret;
+  client_pairing_secret.resize(16 + 256);
   std::copy(client_secret.begin(), client_secret.end(),
       client_pairing_secret.begin());
   std::vector<unsigned char> signed_data = signData(client_secret,
@@ -186,12 +188,6 @@ PairState PairingManager::pair(std::string uid, std::string pin)
       << bytesToHex(&client_pairing_secret[0], client_pairing_secret.size());
   resp = m_http->openHttpConnection(url.str(), true);
   url.str("");
-  if (m_http->getXmlString(resp, "paired") != "1")
-  {
-    url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
-    m_http->openHttpConnection(url.str(), true);
-    return PairState::FAILED;
-  }
 
   //do initial challenges
   isyslog("Do the intial challenged");
@@ -206,13 +202,12 @@ PairState PairingManager::pair(std::string uid, std::string pin)
     return PairState::FAILED;
   }
 
-  isyslog("Paired successfully");
   return PairState::PAIRED;
 }
 
 PairState PairingManager::getPairState(std::string serverInfo)
 {
-  if (m_http->getXmlString(serverInfo, "PairStatus") == "1")
+  if (m_http->getXmlString(serverInfo, "PairStatus") != "1")
   {
     return PairState::NOT_PAIRED;
   }
@@ -298,7 +293,7 @@ std::vector<unsigned char> PairingManager::signData(
     }
 
     size_t slen;
-    signature.reserve(req);
+    signature.resize(req);
     rc = EVP_DigestSignFinal(ctx, signature.data(), &slen);
     if (rc != 1)
     {
