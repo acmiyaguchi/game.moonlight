@@ -22,6 +22,7 @@
 #include "nvstream/NvHTTP.h"
 #include "nvstream/PairingManager.h"
 #include "settings/Preferences.h"
+#include <iostream>
 #include <stddef.h>
 
 using namespace MOONLIGHT;
@@ -50,8 +51,6 @@ void CMoonlightClient::stop()
 {
   LiStopConnection();
 }
-
-#include <fstream>
 
 void CMoonlightClient::pair(std::string uid, std::string host)
 {
@@ -85,8 +84,11 @@ void CMoonlightClient::pair(std::string uid, std::string host)
 
   if (http.getPairState(serverInfo) == PairState::PAIRED)
   {
-    std::string apps = http.getAppListRaw();
-    isyslog("Applist: %s", apps.c_str());
+    auto appList = http.getAppList();
+    if(!appList.empty()) {
+      auto app = appList[0];
+      isyslog("AppTitle: %s ID: %i", app.getAppName().c_str(), app.getAppId());
+    }
   }
   else {
     isyslog("Lies, you didn't actually pair.");

@@ -20,41 +20,40 @@
 #pragma once
 
 #include "PairingManager.h"
+#include "NvApp.h"
 #include <string>
 
 namespace MOONLIGHT
 {
-  class PairingManager;
   class CertKeyPair;
 
   class NvHTTP
   {
   public:
     NvHTTP(const char* host, std::string uid);
-
     virtual ~NvHTTP();
-
-    std::string getXmlString(std::string str, std::string tagname);
-
-    std::string getServerInfo(std::string uid);
-
-    std::string getServerVersion(std::string serverInfo);
-
-    PairState getPairState();
-
-    PairState getPairState(std::string serverInfo);
-
-    std::string getAppListRaw();
-
-    int getCurrentGame(std::string serverInfo);
-
-    PairState pair(std::string pin);
-
-    std::string openHttpConnection(std::string url, bool enableReadTimeout);
-
     std::string baseUrlHttps;
     std::string baseUrlHttp;
+    std::string openHttpConnection(std::string url, bool enableReadTimeout);
+    std::string getXmlString(std::string str, std::string tagname);
+    NvApp getAppById(int id);
+    //NvApp getAppByName(std::string name);
+    std::vector<NvApp> getAppList();
+    std::string getAppListRaw();
+    // InputStream getBoxArt(NvApp)
+    // ComputerDetails getComputerDetails()
+    int getCurrentGame(std::string serverInfo);
+    PairState getPairState();
+    PairState getPairState(std::string serverInfo);
+    std::string getServerInfo(std::string uid);
+    std::string getServerVersion(std::string serverInfo);
+    // int launchApp(ConnectionContext, int);
+    PairState pair(std::string pin);
+    bool quitApp();
+    // bool resumeApp(ConnectionContext);
+    void unpair();
   private:
+    std::vector<NvApp> getAppList(std::string input);
     PairingManager* m_pm;
     CertKeyPair*    m_cert;
     std::string     m_uid;

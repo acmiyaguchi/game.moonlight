@@ -136,3 +136,50 @@ std::string NvHTTP::openHttpConnection(std::string url, bool enableReadTimeout)
   return ss.str();
 }
 
+NvApp MOONLIGHT::NvHTTP::getAppById(int id)
+{
+  return NvApp("");
+}
+
+std::vector<NvApp> MOONLIGHT::NvHTTP::getAppList()
+{
+  std::stringstream url;
+  url << baseUrlHttps << "/applist?uniqueid=" << m_uid;
+  std::string resp = openHttpConnection(url.str(), true);
+  return getAppList(resp);
+}
+
+std::vector<NvApp> MOONLIGHT::NvHTTP::getAppList(std::string input)
+{
+  std::vector<NvApp> appList;
+  pugi::xml_document doc;
+  pugi::xml_parse_result result = doc.load_buffer(input.c_str(), input.size(), pugi::parse_default, pugi::encoding_auto);
+  if(!result) {
+    esyslog("Did not properly load xml\n");
+    return appList;
+  }
+
+  pugi::xml_node node = doc.child("root").child("App");
+  for(; node; node = node.next_sibling()) {
+    isyslog("App Found: %s", node.child_value("AppTitle"));
+    std::string title = node.child_value("AppTitle");
+    std::string id = node.child_value("ID");
+    std::string running = node.child_value("IsRunning");
+    NvApp app(title);
+    app.setAppId(id);
+    app.setIsRunning(running);
+    appList.push_back(app);
+  }
+
+  return appList;
+}
+
+
+bool MOONLIGHT::NvHTTP::quitApp()
+{
+  return false;
+}
+
+void MOONLIGHT::NvHTTP::unpair()
+{
+}
