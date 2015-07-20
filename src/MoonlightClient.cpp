@@ -22,6 +22,8 @@
 #include "nvstream/NvHTTP.h"
 #include "nvstream/PairingManager.h"
 #include "settings/Preferences.h"
+#include "callbacks/Callbacks.h"
+
 #include <iostream>
 #include <stddef.h>
 
@@ -42,8 +44,10 @@ void CMoonlightClient::start()
   config.bitrate = 5000;
   config.packetSize = 1024;
 
+  DECODER_RENDERER_CALLBACKS video_cb = getDecoderCallbacks();
+
   isyslog("CMoonlightClient::start: Starting moonlight");
-  LiStartConnection(host.c_str(), &config, NULL, NULL, NULL, NULL, NULL, 0, 0);
+  LiStartConnection(host.c_str(), &config, NULL, &video_cb, NULL, NULL, 0, 0);
 
 }
 

@@ -17,22 +17,11 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
+#pragma once
 
-#include "MoonlightClient.h"
-#include "settings/Preferences.h"
-#include <iostream>
-#include <signal.h>
-#include <stdexcept>
-#include <string>
+#include "Limelight.h"
 
-using namespace MOONLIGHT;
-
-int main() {
-  std::string host = "10.0.0.7";
-  Preferences prefs;
-  CMoonlightClient client;
-  client.pair(prefs.getUniqueId(), host);
-  client.start();
-  client.stop();
-  return 0;
+namespace MOONLIGHT
+{
+  DECODER_RENDERER_CALLBACKS getDecoderCallbacks();
 }
