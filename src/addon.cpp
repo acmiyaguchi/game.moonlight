@@ -17,14 +17,17 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
+
+#include "MoonlightClient.h"
+#include "MoonlightEnvironment.h"
+#include "log/Log.h"
+#include "log/LogConsole.h"
+#include "utils/CommonMacros.h"
+
 #include "kodi/libXBMC_addon.h"
 #include "kodi/libKODI_game.h"
 #include "kodi/xbmc_addon_dll.h"
 #include "kodi/kodi_game_dll.h"
-#include "MoonlightClient.h"
-#include "log/Log.h"
-#include "log/LogConsole.h"
-#include "utils/CommonMacros.h"
 
 #include <vector>
 
@@ -59,6 +62,7 @@ ADDON_STATUS ADDON_Create(void* callbacks, void* props)
     CLog::Get().SetPipe(new CLogConsole());
 
     CLIENT = new CMoonlightClient;
+    CMoonlightEnvironment::Get().Initialize(KODI, FRONTEND, CLIENT);
 
   } catch (const ADDON_STATUS& status)
   {
@@ -79,6 +83,8 @@ void ADDON_Stop()
 void ADDON_Destroy()
 {
   CLog::Get().SetType(SYS_LOG_TYPE_CONSOLE);
+
+  CMoonlightEnvironment::Get().Deinitialize();
 
   SAFE_DELETE(KODI);
   SAFE_DELETE(FRONTEND);

@@ -39,7 +39,7 @@ void CMoonlightClient::start()
   config.width = 800;
   config.height = 600;
   config.fps = 60;
-  config.bitrate = 1024;
+  config.bitrate = 5000;
   config.packetSize = 1024;
 
   isyslog("CMoonlightClient::start: Starting moonlight");
