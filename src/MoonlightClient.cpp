@@ -46,9 +46,10 @@ void CMoonlightClient::start()
 
   DECODER_RENDERER_CALLBACKS video_cb = getDecoderCallbacks();
   CONNECTION_LISTENER_CALLBACKS conn_cb = getConnectionCallbacks();
+  AUDIO_RENDERER_CALLBACKS audio_cb = getAudioCallbacks();
 
   isyslog("CMoonlightClient::start: Starting moonlight");
-  LiStartConnection(host.c_str(), &config, &conn_cb, &video_cb, NULL, NULL, 0, 0);
+  LiStartConnection(host.c_str(), &config, &conn_cb, &video_cb, &audio_cb, NULL, 0, 0);
 
 }
 

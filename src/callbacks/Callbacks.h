@@ -25,4 +25,5 @@ namespace MOONLIGHT
 {
   DECODER_RENDERER_CALLBACKS getDecoderCallbacks();
   CONNECTION_LISTENER_CALLBACKS getConnectionCallbacks();
+  AUDIO_RENDERER_CALLBACKS getAudioCallbacks();
 }

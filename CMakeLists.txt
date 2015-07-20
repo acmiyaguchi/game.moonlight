@@ -44,6 +44,7 @@ set(MOONLIGHT_SOURCES src/MoonlightClient.cpp
                       src/settings/Preferences.cpp
                       src/callbacks/VideoCallbacks.cpp
                       src/callbacks/ConnectionCallbacks.cpp
+                      src/callbacks/AudioCallbacks.cpp
                       lib/pugixml/src/pugixml.cpp)
 
 set(STANDALONE_SOURCES src/main.cpp)
