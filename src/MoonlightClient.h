@@ -24,14 +24,20 @@
 
 namespace MOONLIGHT
 {
+  class Preferences;
+  class NvHTTP;
+
   class CMoonlightClient
   {
   public:
-    CMoonlightClient();
+    CMoonlightClient(std::string host);
+    virtual ~CMoonlightClient();
     void start();
     void stop();
-    void pair(std::string uid, std::string host);
+    void pair();
   private:
-    void init();
+    std::string m_host;
+    Preferences* m_prefs;
+    NvHTTP* m_http;
   };
 }

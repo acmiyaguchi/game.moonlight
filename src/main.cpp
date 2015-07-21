@@ -29,9 +29,8 @@ using namespace MOONLIGHT;
 
 int main() {
   std::string host = "10.0.0.7";
-  Preferences prefs;
-  CMoonlightClient client;
-  client.pair(prefs.getUniqueId(), host);
+  CMoonlightClient client(host);
+  client.pair();
   client.start();
   client.stop();
   return 0;

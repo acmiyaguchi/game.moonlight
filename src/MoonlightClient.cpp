@@ -29,14 +29,21 @@
 
 using namespace MOONLIGHT;
 
-CMoonlightClient::CMoonlightClient()
+CMoonlightClient::CMoonlightClient(std::string host)
+  : m_host(host)
 {
+  m_prefs = new Preferences();
+  m_http = new NvHTTP(m_host.c_str(), m_prefs->getUniqueId());
+}
 
+MOONLIGHT::CMoonlightClient::~CMoonlightClient()
+{
+  delete m_prefs;
+  delete m_http;
 }
 
 void CMoonlightClient::start()
 {
-  std::string host = "10.0.0.7"; //192.168.1.85
   STREAM_CONFIGURATION config;
   config.width = 800;
   config.height = 600;
@@ -49,8 +56,18 @@ void CMoonlightClient::start()
   AUDIO_RENDERER_CALLBACKS audio_cb = getAudioCallbacks();
 
   isyslog("CMoonlightClient::start: Starting moonlight");
-  LiStartConnection(host.c_str(), &config, &conn_cb, &video_cb, &audio_cb, NULL, 0, 0);
 
+  auto appList = m_http->getAppList();
+  if(appList.empty()) {
+    esyslog("Empty app list");
+    return;
+  }
+
+  auto app = appList[0];
+  m_http->launchApp(&config, app.getAppId(), false, false);
+  isyslog("CMoonlightClient::start: Launching app %s", app.getAppName().c_str());
+
+  LiStartConnection(m_host.c_str(), &config, &conn_cb, &video_cb, &audio_cb, NULL, 0, 0);
 }
 
 void CMoonlightClient::stop()
@@ -58,12 +75,11 @@ void CMoonlightClient::stop()
   LiStopConnection();
 }
 
-void CMoonlightClient::pair(std::string uid, std::string host)
+void CMoonlightClient::pair()
 {
   std::string message;
-  NvHTTP http(host.c_str(), uid);
-  std::string serverInfo = http.getServerInfo(uid);
-  if (http.getPairState(serverInfo) == PairState::PAIRED)
+  std::string serverInfo = m_http->getServerInfo(m_prefs->getUniqueId());
+  if (m_http->getPairState(serverInfo) == PairState::PAIRED)
   {
     message = "Already paired";
   }
@@ -72,7 +88,7 @@ void CMoonlightClient::pair(std::string uid, std::string host)
     std::string pin = PairingManager::generatePinString();
     isyslog("Pin to pair: %s\n", pin.c_str());
 
-    PairState pair_state = http.pair(pin);
+    PairState pair_state = m_http->pair(pin);
     switch (pair_state)
     {
     case PairState::PIN_WRONG:
@@ -88,9 +104,9 @@ void CMoonlightClient::pair(std::string uid, std::string host)
   }
   isyslog("%s", message.c_str());
 
-  if (http.getPairState(serverInfo) == PairState::PAIRED)
+  if (m_http->getPairState(serverInfo) == PairState::PAIRED)
   {
-    auto appList = http.getAppList();
+    auto appList = m_http->getAppList();
     if(!appList.empty()) {
       auto app = appList[0];
       isyslog("AppTitle: %s ID: %i", app.getAppName().c_str(), app.getAppId());
@@ -99,9 +115,4 @@ void CMoonlightClient::pair(std::string uid, std::string host)
   else {
     isyslog("Lies, you didn't actually pair.");
   }
-}
-
-void CMoonlightClient::init()
-{
-
 }

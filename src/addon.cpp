@@ -61,7 +61,8 @@ ADDON_STATUS ADDON_Create(void* callbacks, void* props)
 
     CLog::Get().SetPipe(new CLogConsole());
 
-    CLIENT = new CMoonlightClient;
+    std::string host = "10.0.0.7";
+    CLIENT = new CMoonlightClient(host);
     CMoonlightEnvironment::Get().Initialize(KODI, FRONTEND, CLIENT);
 
   } catch (const ADDON_STATUS& status)
