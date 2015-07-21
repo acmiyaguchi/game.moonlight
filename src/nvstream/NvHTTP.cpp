@@ -25,6 +25,8 @@
 #include <fstream>
 #include "pugixml.hpp"
 #include "http.h"
+#include "Limelight.h"
+#include <openssl/rand.h>
 
 using namespace MOONLIGHT;
 
@@ -147,6 +149,39 @@ std::vector<NvApp> MOONLIGHT::NvHTTP::getAppList()
   url << baseUrlHttps << "/applist?uniqueid=" << m_uid;
   std::string resp = openHttpConnection(url.str(), true);
   return getAppList(resp);
+}
+
+int MOONLIGHT::NvHTTP::launchApp(STREAM_CONFIGURATION* config, int appId, bool sops, bool localaudio)
+{
+  initializeConfig(config);
+  uint32_t rikey = 1;
+  std::stringstream url;
+  url << baseUrlHttps << "/launch?uniqueid=" << m_uid
+      << "&appid=" << appId
+      << "&mode=" << config->width << "x" << config->height << "x" << config->fps
+      << "&additionalStates=1&sops=" << (int)sops
+      << "&rikey=" << m_pm->bytesToHex((unsigned char*)config->remoteInputAesKey, 16)
+      << "&rikeyid=" << rikey
+      << "&localAudioPlayMode=" << (int)localaudio;
+  std::string resp = openHttpConnection(url.str(), false);
+
+}
+
+bool MOONLIGHT::NvHTTP::resumeApp(STREAM_CONFIGURATION* config)
+{
+  initializeConfig(config);
+  uint32_t rikey = 1;
+  std::stringstream url;
+  url << baseUrlHttps << "/resume?uniqueid=" << m_uid
+      << "&rikey=" << m_pm->bytesToHex((unsigned char*)config->remoteInputAesKey, 16)
+      << "&rikeyid=" << rikey;
+  std::string resp = openHttpConnection(url.str(), false);
+}
+
+void MOONLIGHT::NvHTTP::initializeConfig(STREAM_CONFIGURATION* config)
+{
+  RAND_bytes((unsigned char*)config->remoteInputAesKey, 16);
+  memset(config->remoteInputAesIv, 0, 16);
 }
 
 std::vector<NvApp> MOONLIGHT::NvHTTP::getAppList(std::string input)

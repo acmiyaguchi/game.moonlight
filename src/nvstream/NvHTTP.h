@@ -22,6 +22,7 @@
 #include "PairingManager.h"
 #include "NvApp.h"
 #include <string>
+#include "Limelight.h"
 
 namespace MOONLIGHT
 {
@@ -47,12 +48,13 @@ namespace MOONLIGHT
     PairState getPairState(std::string serverInfo);
     std::string getServerInfo(std::string uid);
     std::string getServerVersion(std::string serverInfo);
-    // int launchApp(ConnectionContext, int);
+    int launchApp(STREAM_CONFIGURATION* config, int appId, bool sops, bool localaudio);
     PairState pair(std::string pin);
     bool quitApp();
-    // bool resumeApp(ConnectionContext);
+    bool resumeApp(STREAM_CONFIGURATION* config);
     void unpair();
   private:
+    void initializeConfig(STREAM_CONFIGURATION* config);
     std::vector<NvApp> getAppList(std::string input);
     PairingManager* m_pm;
     CertKeyPair*    m_cert;
