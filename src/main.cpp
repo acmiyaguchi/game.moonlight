@@ -30,7 +30,11 @@ using namespace MOONLIGHT;
 int main() {
   std::string host = "10.0.0.7";
   CMoonlightClient client(host);
-  client.pair();
+  bool res = client.pair();
+  if(!res) {
+    std::cout << "Error pairing" << std::endl;
+    return -1;
+  }
   client.start();
   client.stop();
   return 0;

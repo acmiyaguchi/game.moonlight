@@ -64,6 +64,7 @@ void CMoonlightClient::start()
   }
 
   auto app = appList[0];
+  isyslog("AppTitle: %s ID: %i", app.getAppName().c_str(), app.getAppId());
   m_http->launchApp(&config, app.getAppId(), false, false);
   isyslog("CMoonlightClient::start: Launching app %s", app.getAppName().c_str());
 
@@ -75,13 +76,12 @@ void CMoonlightClient::stop()
   LiStopConnection();
 }
 
-void CMoonlightClient::pair()
+bool CMoonlightClient::pair()
 {
-  std::string message;
   std::string serverInfo = m_http->getServerInfo(m_prefs->getUniqueId());
   if (m_http->getPairState(serverInfo) == PairState::PAIRED)
   {
-    message = "Already paired";
+     isyslog("Already paired");
   }
   else
   {
@@ -92,27 +92,16 @@ void CMoonlightClient::pair()
     switch (pair_state)
     {
     case PairState::PIN_WRONG:
-      message = "Incorrect PIN";
-      break;
+      esyslog("Incorrect PIN");
+      return false;
     case PairState::FAILED:
-      message = "Pairing failed";
-      break;
+      esyslog("Pairing failed");
+      return false;
     case PairState::PAIRED:
-      message = "Paired successfully";
+      isyslog("Paired successfully");
       break;
     }
   }
-  isyslog("%s", message.c_str());
 
-  if (m_http->getPairState(serverInfo) == PairState::PAIRED)
-  {
-    auto appList = m_http->getAppList();
-    if(!appList.empty()) {
-      auto app = appList[0];
-      isyslog("AppTitle: %s ID: %i", app.getAppName().c_str(), app.getAppId());
-    }
-  }
-  else {
-    isyslog("Lies, you didn't actually pair.");
-  }
+  return true;
 }

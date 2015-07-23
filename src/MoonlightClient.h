@@ -34,7 +34,7 @@ namespace MOONLIGHT
     virtual ~CMoonlightClient();
     void start();
     void stop();
-    void pair();
+    bool pair();
   private:
     std::string m_host;
     Preferences* m_prefs;
