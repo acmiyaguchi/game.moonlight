@@ -87,7 +87,11 @@ std::string NvHTTP::getServerInfo(std::string uid)
   url << baseUrlHttps << "/serverinfo?uniqueid=" << m_uid;
 
   std::string resp = openHttpConnection(url.str(), true);
-
+  if(resp.empty()) {
+    url.str("");
+    url << baseUrlHttp << "/serverinfo";
+    resp = openHttpConnection(url.str(), true);
+  }
   // TODO: Incomplete function, need to default to http in the case that the
   // client is unpaired with the host
 

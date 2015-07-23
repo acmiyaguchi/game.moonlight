@@ -76,10 +76,10 @@ int http_request(char* url, struct http_data* data) {
   
   if(res != CURLE_OK) {
     fprintf(stderr, "Connection failed: %s\n", curl_easy_strerror(res));
-    exit(EXIT_FAILURE);
+    //exit(EXIT_FAILURE);
   }
   
-  return 0;
+  return res;
 }
 
 void http_cleanup() {
