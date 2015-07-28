@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <ctime>
+#include <openssl/rand.h>
 
 using namespace MOONLIGHT;
 
@@ -44,9 +45,12 @@ Preferences::~Preferences()
 
 void Preferences::init(ResolutionType res, bool fullscreen)
 {
-  srand(time(0));
   char buf[20];
-  sprintf(buf, "%016x", rand());
+  unsigned char unique_data[8];
+  RAND_bytes(unique_data, 8);
+  for (int i = 0; i < 8; i++) {
+    sprintf(buf + (i * 2), "%02x", unique_data[i]);
+  }
 
   m_resolution = new Resolution(res);
   m_bitrate = m_resolution->getBitrate();
