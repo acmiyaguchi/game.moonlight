@@ -47,14 +47,21 @@ set(MOONLIGHT_SOURCES src/MoonlightClient.cpp
                       src/callbacks/AudioCallbacks.cpp
                       lib/pugixml/src/pugixml.cpp)
 
-set(STANDALONE_SOURCES src/main.cpp)
-set(ADDON_SOURCES src/addon.cpp)
+set(STANDALONE_SOURCES
+    ${MOONLIGHT_SOURCES}
+    src/main.cpp
+)
+
+set(ADDON_SOURCES
+    ${MOONLIGHT_SOURCES}
+    src/addon.cpp
+)
 
 # build standalone
-add_executable(moonlight_client ${MOONLIGHT_SOURCES} ${STANDALONE_SOURCES})
+add_executable(moonlight_client ${STANDALONE_SOURCES})
 target_link_libraries(moonlight_client ${DEPLIBS})
 
 # build addon
-build_addon(game.moonlight MOONLIGHT ${ADDON_SOURCES} DEPLIBS)
+build_addon(game.moonlight ADDON DEPLIBS)
 
 include(CPack)
