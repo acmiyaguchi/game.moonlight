@@ -225,13 +225,25 @@ std::string PairingManager::bytesToHex(unsigned char* in, unsigned len)
   return ss.str();
 }
 
+namespace {
+int char2int(char input)
+{
+  if(input >= '0' && input <= '9')
+    return input - '0';
+  if(input >= 'A' && input <= 'F')
+    return input - 'A' + 10;
+  if(input >= 'a' && input <= 'f')
+    return input - 'a' + 10;
+}
+}
+
 std::vector<unsigned char> PairingManager::hexToBytes(std::string s)
 {
   int len = s.length();
   std::vector<unsigned char> data(len / 2);
   for (int i = 0; i < len; i += 2)
   {
-    data[i / 2] = ((s[i] - '0') << 4) | (s[i + 1] - '0');
+    data[i / 2] = (char2int(s[i]) << 4) | (char2int(s[i + 1]));
   }
   return data;
 }
