@@ -24,6 +24,8 @@
 #include <signal.h>
 #include <stdexcept>
 #include <string>
+#include <thread>
+#include <unistd.h>
 
 using namespace MOONLIGHT;
 
@@ -36,6 +38,8 @@ int main() {
     return -1;
   }
   client.start();
+  std::thread delay (sleep, 5);
+  delay.join();
   client.stop();
   return 0;
 }
