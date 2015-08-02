@@ -2,6 +2,7 @@
 #include "log/Log.h"
 #include "MoonlightEnvironment.h"
 #include "kodi/libKODI_game.h"
+#include "Limelight.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -15,6 +16,7 @@ static AVCodec* codec = NULL;
 static AVCodecContext* codec_context = NULL;
 static AVFrame* picture = NULL;
 static AVCodecParserContext* parser = NULL;
+static CHelper_libKODI_game* frontend = NULL;
 
 void decoder_renderer_setup(int width, int height, int redrawRate, void* context, int drFlags)
 {
@@ -36,6 +38,8 @@ void decoder_renderer_setup(int width, int height, int redrawRate, void* context
   if(!parser) {
 	  esyslog("Cannot create h264 parser");
   }
+
+  frontend = CMoonlightEnvironment::Get().GetFrontend();
 }
 
 void decoder_renderer_cleanup()
@@ -47,39 +51,68 @@ void decoder_renderer_cleanup()
 	}
 	if (codec_context) {
 		avcodec_close(codec_context);
-		av_freep(codec_context);
 		codec_context = NULL;
 	}
 	if (picture) {
 		av_freep(picture);
 		picture = NULL;
 	}
+	if(frontend) {
+	  frontend = NULL;
+	}
 }
+
+void decode_frame(uint8_t* data, int size) {
+  int got_picture = 0;
+  int len = 0;
+  AVPacket packet;
+  av_init_packet(&packet);
+  packet.data = data;
+  packet.size = size;
+  len = avcodec_decode_video2(codec_context, picture, &got_picture, &packet);
+  if(len < 0) {
+    esyslog("Error while decoding frame");
+  }
+  if (got_picture == 0) {
+    return;
+  }
+  if(frontend) {
+    isyslog("Dump video out");
+    frontend->VideoFrame(picture->data[0], picture->width, picture->height, GAME_RENDER_FMT_YUV420P);
+  }
+}
+
+static std::vector<uint8_t> buffer;
 
 int decoder_renderer_submit_decode_unit(PDECODE_UNIT decodeUnit)
 {
-	int got_picture = 0;
 	int len = 0;
-
+	// Read data into the stored frame buffer
 	PLENTRY entry = decodeUnit->bufferList;
 	while (entry != NULL) {
-		AVPacket packet;
-		av_init_packet(&packet);
-		packet.data = (uint8_t*)entry->data;
-		packet.size = entry->length;
-		len = avcodec_decode_video2(codec_context, picture, &got_picture, &packet);
-		if(len < 0) {
-			esyslog("Error while decoding frame");
-		}
-		if (got_picture) {
-			auto frontend = CMoonlightEnvironment::Get().GetFrontend();
-			if(frontend) {
-				frontend->VideoFrame(picture->data[0], picture->width, picture->height, GAME_RENDER_FMT_YUV420P);
-			}
-		}
-		entry = entry->next;
+	   std::copy(entry->data, entry->data + entry->length, std::back_inserter(buffer));
+	   entry = entry->next;
 	}
-  return 0;
+
+	// Check if we have a completed frame
+	if (buffer.empty()) {
+	  return DR_OK;
+	}
+	uint8_t* data = NULL;
+	int size = 0;
+	len = av_parser_parse2(parser, codec_context, &data, &size, &buffer[0], buffer.size(), 0, 0, AV_NOPTS_VALUE);
+	if(size == 0 && len >= 0) {
+	  return DR_OK;
+	}
+
+	if(len) {
+	  decode_frame(&buffer[0], size);
+	  buffer.erase(buffer.begin(), buffer.begin() + len);
+	  return DR_OK;
+	}
+
+  buffer.erase(buffer.begin(), buffer.end());
+  return DR_OK;
 }
 
 DECODER_RENDERER_CALLBACKS MOONLIGHT::getDecoderCallbacks()
