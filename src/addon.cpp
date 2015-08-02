@@ -146,6 +146,7 @@ GAME_ERROR LoadGameSpecial(SPECIAL_GAME_TYPE type, const char** urls, size_t url
 
 GAME_ERROR LoadStandalone(void)
 {
+  CLIENT->pair();
   CLIENT->start();
   return GAME_ERROR_NO_ERROR;
 }

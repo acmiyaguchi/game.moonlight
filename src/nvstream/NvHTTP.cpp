@@ -216,7 +216,10 @@ std::vector<NvApp> MOONLIGHT::NvHTTP::getAppList(std::string input)
 
 bool MOONLIGHT::NvHTTP::quitApp()
 {
-  return false;
+  std::stringstream url;
+  url << baseUrlHttps << "/cancel?uniqueid=" << m_uid;
+  std::string xmlStr = openHttpConnection(url.str(), false);
+  return getXmlString(xmlStr, "cancel") != "0";
 }
 
 void MOONLIGHT::NvHTTP::unpair()
