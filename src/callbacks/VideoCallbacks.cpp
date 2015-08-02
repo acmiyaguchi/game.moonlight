@@ -54,7 +54,6 @@ void decoder_renderer_cleanup()
 		codec_context = NULL;
 	}
 	if (picture) {
-		av_freep(picture);
 		picture = NULL;
 	}
 	if(frontend) {
@@ -62,56 +61,59 @@ void decoder_renderer_cleanup()
 	}
 }
 
-void decode_frame(uint8_t* data, int size) {
-  int got_picture = 0;
-  int len = 0;
-  AVPacket packet;
-  av_init_packet(&packet);
-  packet.data = data;
-  packet.size = size;
-  len = avcodec_decode_video2(codec_context, picture, &got_picture, &packet);
-  if(len < 0) {
-    esyslog("Error while decoding frame");
-  }
-  if (got_picture == 0) {
-    return;
-  }
-  if(frontend) {
-    isyslog("Dump video out");
-    frontend->VideoFrame(picture->data[0], picture->width, picture->height, GAME_RENDER_FMT_YUV420P);
-  }
+static void pgm_save(unsigned char *buf, int wrap, int xsize, int ysize,
+    char *filename)
+{
+  FILE *f;
+  int i;
+
+  f=fopen(filename,"w");
+  fprintf(f,"P5\n%d %d\n%d\n",xsize,ysize,255);
+  for(i=0;i<ysize;i++)
+    fwrite(buf + i * wrap,1,xsize,f);
+  fclose(f);
 }
 
 static std::vector<uint8_t> buffer;
-
 int decoder_renderer_submit_decode_unit(PDECODE_UNIT decodeUnit)
 {
-	int len = 0;
-	// Read data into the stored frame buffer
-	PLENTRY entry = decodeUnit->bufferList;
-	while (entry != NULL) {
-	   std::copy(entry->data, entry->data + entry->length, std::back_inserter(buffer));
-	   entry = entry->next;
-	}
+  int len = 0;
+  char buf[1024];
+  // Read data into the stored frame buffer
+  PLENTRY entry = decodeUnit->bufferList;
+  while (entry != NULL) {
+    std::copy(entry->data, entry->data + entry->length, std::back_inserter(buffer));
+    entry = entry->next;
+  }
 
-	// Check if we have a completed frame
-	if (buffer.empty()) {
-	  return DR_OK;
-	}
-	uint8_t* data = NULL;
-	int size = 0;
-	len = av_parser_parse2(parser, codec_context, &data, &size, &buffer[0], buffer.size(), 0, 0, AV_NOPTS_VALUE);
-	if(size == 0 && len >= 0) {
-	  return DR_OK;
-	}
+  // Check if we have a completed frame
+  if (buffer.empty()) {
+    return DR_OK;
+  }
 
-	if(len) {
-	  decode_frame(&buffer[0], size);
-	  buffer.erase(buffer.begin(), buffer.begin() + len);
-	  return DR_OK;
-	}
+  int got_picture = 0;
+  AVPacket packet;
 
-  buffer.erase(buffer.begin(), buffer.end());
+  av_init_packet(&packet);
+  packet.data = buffer.data();
+  packet.size = buffer.size();
+  len = avcodec_decode_video2(codec_context, picture, &got_picture, &packet);
+  if(len < 0) {
+    esyslog("Error while decoding frame");
+    buffer.clear();
+    return DR_NEED_IDR;
+  }
+  if (got_picture) {
+    if(frontend) {
+      frontend->VideoFrame(picture->data[0], picture->width, picture->height, GAME_RENDER_FMT_YUV420P);
+    }
+    else {
+    // Dump the latest image to a file
+      snprintf(buf, sizeof(buf), "test.pgm");
+      pgm_save(picture->data[0], picture->linesize[0], picture->width, picture->height, buf);
+    }
+    buffer.clear();
+  }
   return DR_OK;
 }
 
