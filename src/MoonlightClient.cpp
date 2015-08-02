@@ -68,12 +68,12 @@ void CMoonlightClient::start()
   isyslog("AppTitle: %s ID: %i", app.getAppName().c_str(), app.getAppId());
   m_http->launchApp(&config, app.getAppId(), false, false);
   isyslog("CMoonlightClient::start: Launching app %s", app.getAppName().c_str());
-
   LiStartConnection(m_host.c_str(), &config, &conn_cb, &video_cb, &audio_cb, NULL, 0, 0);
 }
 
 void CMoonlightClient::stop()
 {
+  isyslog("CMoonlightClient::stop: Stopping application and closing gamestream");
   LiStopConnection();
   m_http->quitApp();
 }
@@ -84,6 +84,10 @@ bool CMoonlightClient::pair()
   if (m_http->getPairState(serverInfo) == PairState::PAIRED)
   {
      isyslog("Already paired");
+  }
+  else if (m_http->getCurrentGame(serverInfo) != 0) {
+    isyslog("Computer is currently in a game. You must close the game before pairing.");
+    return false;
   }
   else
   {
