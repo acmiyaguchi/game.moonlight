@@ -1,5 +1,7 @@
 #include "Callbacks.h"
 #include "log/Log.h"
+#include "MoonlightEnvironment.h"
+#include "kodi/libKODI_game.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -31,6 +33,9 @@ void decoder_renderer_setup(int width, int height, int redrawRate, void* context
   }
   picture = avcodec_alloc_frame();
   parser = av_parser_init(AV_CODEC_ID_H264);
+  if(!parser) {
+	  esyslog("Cannot create h264 parser");
+  }
 }
 
 void decoder_renderer_cleanup()
@@ -56,7 +61,6 @@ int decoder_renderer_submit_decode_unit(PDECODE_UNIT decodeUnit)
 	int got_picture = 0;
 	int len = 0;
 
-	isyslog("START DECODE UNIT");
 	PLENTRY entry = decodeUnit->bufferList;
 	while (entry != NULL) {
 		AVPacket packet;
@@ -68,7 +72,10 @@ int decoder_renderer_submit_decode_unit(PDECODE_UNIT decodeUnit)
 			esyslog("Error while decoding frame");
 		}
 		if (got_picture) {
-			isyslog("GREAT SUCCESS");
+			auto frontend = CMoonlightEnvironment::Get().GetFrontend();
+			if(frontend) {
+				frontend->VideoFrame(picture->data[0], picture->width, picture->height, GAME_RENDER_FMT_YUV420P);
+			}
 		}
 		entry = entry->next;
 	}

@@ -175,12 +175,6 @@ GAME_REGION GetRegion(void)
 
 void FrameEvent(void)
 {
-  size_t buf_len = m_width * m_height;
-  uint8_t data[buf_len * 2];
-  memset((void*) data, 0, buf_len);
-
-  FRONTEND->VideoFrame(static_cast<const uint8_t*>(data), m_width, m_height,
-      GAME_RENDER_FMT_0RGB1555);
 }
 
 GAME_ERROR Reset(void)
