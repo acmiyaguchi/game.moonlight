@@ -8,13 +8,20 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavutil/avutil.h>
 #include <libavutil/mem.h>
+#include <libswscale/swscale.h>
 }
+
+#include <cstring>
 
 using namespace MOONLIGHT;
 
 static AVCodec* codec = NULL;
 static AVCodecContext* codec_context = NULL;
 static AVFrame* picture = NULL;
+
+static struct SwsContext *sws_context = NULL;
+static AVPicture* pic = NULL;
+
 static AVCodecParserContext* parser = NULL;
 static CHelper_libKODI_game* frontend = NULL;
 
@@ -34,12 +41,25 @@ void decoder_renderer_setup(int width, int height, int redrawRate, void* context
 	  esyslog("Could not open codec");
   }
   picture = avcodec_alloc_frame();
+
+  pic = new AVPicture();
+
+  sws_context = sws_getContext(width, height, PIX_FMT_YUV420P, width, height, PIX_FMT_RGB32, SWS_BICUBIC, NULL, NULL, NULL);
+  pic->linesize[0] = width * 4;
+  pic->data[0]     = new uint8_t[pic->linesize[0] * height];
+
   parser = av_parser_init(AV_CODEC_ID_H264);
   if(!parser) {
 	  esyslog("Cannot create h264 parser");
   }
 
   frontend = CMoonlightEnvironment::Get().GetFrontend();
+
+  int size = width*height*3/2;
+  uint8_t image[size];
+  std::memset(image, 154, size);
+
+  frontend->VideoFrame(image, 800, 600, GAME_RENDER_FMT_YUV420P);
 }
 
 void decoder_renderer_cleanup()
@@ -56,6 +76,12 @@ void decoder_renderer_cleanup()
 	if (picture) {
 		picture = NULL;
 	}
+
+	if (pic) {
+	  delete [] pic->data[0];
+	  delete pic;
+	}
+
 	if(frontend) {
 	  frontend = NULL;
 	}
@@ -74,6 +100,7 @@ static void pgm_save(unsigned char *buf, int wrap, int xsize, int ysize,
   fclose(f);
 }
 
+static int frame_count = 0;
 static std::vector<uint8_t> buffer;
 int decoder_renderer_submit_decode_unit(PDECODE_UNIT decodeUnit)
 {
@@ -104,11 +131,13 @@ int decoder_renderer_submit_decode_unit(PDECODE_UNIT decodeUnit)
     return DR_NEED_IDR;
   }
   if (got_picture) {
+    isyslog("Frame Count: %i", frame_count++);
     if(frontend) {
-      frontend->VideoFrame(picture->data[0], picture->width, picture->height, GAME_RENDER_FMT_YUV420P);
+      sws_scale(sws_context, picture->data, picture->linesize, 0, picture->height, pic->data, pic->linesize);
+      frontend->VideoFrame(pic->data[0], picture->width, picture->height, GAME_RENDER_FMT_0RGB8888);
     }
     else {
-    // Dump the latest image to a file
+      // Dump the latest image to a file
       snprintf(buf, sizeof(buf), "test.pgm");
       pgm_save(picture->data[0], picture->linesize[0], picture->width, picture->height, buf);
     }
