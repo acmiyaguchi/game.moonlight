@@ -112,6 +112,7 @@ void* decode_and_render(void* args)
 {
   char buf[1024];
   int got_picture = 0;
+  int len = 0;
   AVPacket packet;
   decode_unit buffer;
   av_init_packet(&packet);
@@ -131,12 +132,19 @@ void* decode_and_render(void* args)
       mutex.Unlock();
     }
 
-    buffer = render_queue.front();
+    decode_unit temp = render_queue.front();
+    if(got_picture) {
+      buffer = temp;
+    }
+    else {
+      buffer.insert(buffer.end(), temp.begin(), temp.end());
+    }
     render_queue.pop();
 
     packet.data = buffer.data();
     packet.size = buffer.size();
-    int len = avcodec_decode_video2(codec_context, picture, &got_picture, &packet);
+
+    len = avcodec_decode_video2(codec_context, picture, &got_picture, &packet);
     if(len < 0) {
       esyslog("Error while decoding frame");
     }
