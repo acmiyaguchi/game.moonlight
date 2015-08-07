@@ -49,7 +49,7 @@ void CMoonlightClient::start()
   config.width = 800;
   config.height = 600;
   config.fps = 30;
-  config.bitrate = 4250;
+  config.bitrate = 3500;
   config.packetSize = 1024;
 
   DECODER_RENDERER_CALLBACKS video_cb = getDecoderCallbacks();

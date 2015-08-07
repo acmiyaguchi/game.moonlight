@@ -11,9 +11,12 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
+#include <platform/threads/threads.h>
+#include <queue>
 #include <cstring>
 
 using namespace MOONLIGHT;
+using namespace PLATFORM;
 
 static AVCodec* codec = NULL;
 static AVCodecContext* codec_context = NULL;
@@ -24,6 +27,8 @@ static AVPicture* pic = NULL;
 
 static AVCodecParserContext* parser = NULL;
 static CHelper_libKODI_game* frontend = NULL;
+
+void* decode_and_render(void* args);
 
 void decoder_renderer_setup(int width, int height, int redrawRate, void* context, int drFlags)
 {
@@ -54,12 +59,8 @@ void decoder_renderer_setup(int width, int height, int redrawRate, void* context
   }
 
   frontend = CMoonlightEnvironment::Get().GetFrontend();
-
-  int size = width*height*3/2;
-  uint8_t image[size];
-  std::memset(image, 154, size);
-
-  frontend->VideoFrame(image, 800, 600, GAME_RENDER_FMT_YUV420P);
+  thread_t thread;
+  ThreadsCreate(thread, decode_and_render, NULL);
 }
 
 void decoder_renderer_cleanup()
@@ -101,47 +102,83 @@ static void pgm_save(unsigned char *buf, int wrap, int xsize, int ysize,
 }
 
 static int frame_count = 0;
-static std::vector<uint8_t> buffer;
+typedef std::vector<uint8_t> decode_unit;
+static std::queue<decode_unit> data_queue;
+static std::queue<decode_unit> render_queue;
+static CMutex mutex;
+static CEvent event;
+
+void* decode_and_render(void* args)
+{
+  char buf[1024];
+  int got_picture = 0;
+  AVPacket packet;
+  decode_unit buffer;
+  av_init_packet(&packet);
+
+  for(;;) {
+    // Grab lock, grab data, unlock
+    if(render_queue.empty()) {
+      mutex.Lock();
+      if(data_queue.empty()) {
+        mutex.Unlock();
+        event.Wait(); // wait for more data on the queue
+        continue;
+      }
+      else {
+        render_queue.swap(data_queue);
+      }
+      mutex.Unlock();
+    }
+
+    buffer = render_queue.front();
+    render_queue.pop();
+
+    packet.data = buffer.data();
+    packet.size = buffer.size();
+    int len = avcodec_decode_video2(codec_context, picture, &got_picture, &packet);
+    if(len < 0) {
+      esyslog("Error while decoding frame");
+    }
+    if (got_picture) {
+      isyslog("Frame Count: %i", frame_count++);
+      if(frontend) {
+        sws_scale(sws_context, picture->data, picture->linesize, 0, picture->height, pic->data, pic->linesize);
+        frontend->VideoFrame(pic->data[0], picture->width, picture->height, GAME_RENDER_FMT_0RGB8888);
+      }
+      else {
+        // Dump the latest image to a file
+        snprintf(buf, sizeof(buf), "test.pgm");
+        pgm_save(picture->data[0], picture->linesize[0], picture->width, picture->height, buf);
+      }
+    }
+  }
+}
+
+const int MAX_PACKET_LENGTH = 64;
 int decoder_renderer_submit_decode_unit(PDECODE_UNIT decodeUnit)
 {
   int len = 0;
-  char buf[1024];
+  bool packet_dropped = false;
   // Read data into the stored frame buffer
+  decode_unit buffer;
   PLENTRY entry = decodeUnit->bufferList;
   while (entry != NULL) {
     std::copy(entry->data, entry->data + entry->length, std::back_inserter(buffer));
     entry = entry->next;
   }
-
-  // Check if we have a completed frame
-  if (buffer.empty()) {
-    return DR_OK;
+  mutex.Lock();
+  if(data_queue.size() < MAX_PACKET_LENGTH) {
+    data_queue.push(buffer);
+    event.Signal();
   }
-
-  int got_picture = 0;
-  AVPacket packet;
-
-  av_init_packet(&packet);
-  packet.data = buffer.data();
-  packet.size = buffer.size();
-  len = avcodec_decode_video2(codec_context, picture, &got_picture, &packet);
-  if(len < 0) {
-    esyslog("Error while decoding frame");
-    buffer.clear();
+  else {
+    isyslog("discarding packet");
+    packet_dropped = true;
+  }
+  mutex.Unlock();
+  if(packet_dropped) {
     return DR_NEED_IDR;
-  }
-  if (got_picture) {
-    isyslog("Frame Count: %i", frame_count++);
-    if(frontend) {
-      sws_scale(sws_context, picture->data, picture->linesize, 0, picture->height, pic->data, pic->linesize);
-      frontend->VideoFrame(pic->data[0], picture->width, picture->height, GAME_RENDER_FMT_0RGB8888);
-    }
-    else {
-      // Dump the latest image to a file
-      snprintf(buf, sizeof(buf), "test.pgm");
-      pgm_save(picture->data[0], picture->linesize[0], picture->width, picture->height, buf);
-    }
-    buffer.clear();
   }
   return DR_OK;
 }
