@@ -29,10 +29,12 @@ static AVCodecParserContext* parser = NULL;
 static CHelper_libKODI_game* frontend = NULL;
 
 void* decode_and_render(void* args);
-
+static int m_width = 0;
+static int m_height = 0;
 void decoder_renderer_setup(int width, int height, int redrawRate, void* context, int drFlags)
 {
   isyslog("VideoCallbacks::Setup");
+  /*
   avcodec_register_all();
   codec = avcodec_find_decoder(AV_CODEC_ID_H264);
   if (!codec) {
@@ -57,10 +59,13 @@ void decoder_renderer_setup(int width, int height, int redrawRate, void* context
   if(!parser) {
 	  esyslog("Cannot create h264 parser");
   }
-
-  frontend = CMoonlightEnvironment::Get().GetFrontend();
+*/
   thread_t thread;
   ThreadsCreate(thread, decode_and_render, NULL);
+
+  m_width = width;
+  m_height = height;
+  frontend = CMoonlightEnvironment::Get().GetFrontend();
 }
 
 void decoder_renderer_cleanup()
@@ -107,6 +112,7 @@ static std::queue<decode_unit> data_queue;
 static std::queue<decode_unit> render_queue;
 static CMutex mutex;
 static CEvent event;
+static volatile bool reset_buffers = false;
 
 void* decode_and_render(void* args)
 {
@@ -132,18 +138,16 @@ void* decode_and_render(void* args)
       mutex.Unlock();
     }
 
-    decode_unit temp = render_queue.front();
-    if(got_picture) {
-      buffer = temp;
-    }
-    else {
-      buffer.insert(buffer.end(), temp.begin(), temp.end());
-    }
+    buffer = render_queue.front();
     render_queue.pop();
 
     packet.data = buffer.data();
     packet.size = buffer.size();
-
+    if (!frontend->VideoFrameH264(buffer.data(), buffer.size(), m_width, m_height)) {
+    	isyslog("error in decoding");
+    	reset_buffers = true;
+    }
+/*
     len = avcodec_decode_video2(codec_context, picture, &got_picture, &packet);
     if(len < 0) {
       esyslog("Error while decoding frame");
@@ -160,6 +164,7 @@ void* decode_and_render(void* args)
         pgm_save(picture->data[0], picture->linesize[0], picture->width, picture->height, buf);
       }
     }
+    */
   }
 }
 
@@ -167,7 +172,12 @@ const int MAX_PACKET_LENGTH = 64;
 int decoder_renderer_submit_decode_unit(PDECODE_UNIT decodeUnit)
 {
   int len = 0;
-  bool packet_dropped = false;
+  if(reset_buffers) {
+	std::queue<decode_unit>().swap(data_queue);
+	std::queue<decode_unit>().swap(render_queue);
+    reset_buffers = false;
+    return DR_NEED_IDR;
+  }
   // Read data into the stored frame buffer
   decode_unit buffer;
   PLENTRY entry = decodeUnit->bufferList;
@@ -182,12 +192,9 @@ int decoder_renderer_submit_decode_unit(PDECODE_UNIT decodeUnit)
   }
   else {
     isyslog("discarding packet");
-    packet_dropped = true;
   }
   mutex.Unlock();
-  if(packet_dropped) {
-    return DR_NEED_IDR;
-  }
+
   return DR_OK;
 }
 
