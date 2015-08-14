@@ -179,7 +179,7 @@ GAME_ERROR GetGameInfo(game_system_av_info* info)
   info->geometry.max_height = res.getHeight();
   info->geometry.aspect_ratio = 0.0;
   info->timing.fps = static_cast<float>(res.getFramerate());
-  info->timing.sample_rate = 0.0;
+  info->timing.sample_rate = 48000;
 
   return GAME_ERROR_NO_ERROR;
 }

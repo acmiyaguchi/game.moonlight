@@ -12,6 +12,7 @@ find_package(kodiplatform REQUIRED)
 find_package(platform REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(CURL REQUIRED)
+find_package(Opus REQUIRED)
 
 include_directories(${INCLUDES}
                     ${platform_INCLUDE_DIRS}
@@ -19,6 +20,7 @@ include_directories(${INCLUDES}
                     ${OPENSSL_INCLUDE_DIRS}
                     ${KODI_INCLUDE_DIR}
                     ${CURL_INCLUDE_DIR}
+                    ${OPUS_INCLUDE_DIR}
                     ${PROJECT_SOURCE_DIR}/lib/pugixml/src
                     ${PROJECT_SOURCE_DIR}/src
                     ${PROJECT_SOURCE_DIR}/lib/moonlight/limelight-common)
@@ -27,6 +29,7 @@ list(APPEND DEPLIBS ${kodiplatform_LIBRARIES}
                     ${platform_LIBRARIES}
                     ${OPENSSL_LIBRARIES}
                     ${CURL_LIBRARIES}
+                    ${OPUS_LIBRARIES}
                     moonlight)
 
 set(MOONLIGHT_SOURCES src/MoonlightClient.cpp
