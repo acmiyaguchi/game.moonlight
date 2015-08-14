@@ -41,7 +41,7 @@ set(MOONLIGHT_SOURCES src/MoonlightClient.cpp
                       src/nvstream/PairingManager.cpp
                       src/nvstream/http.c
                       src/settings/Resolution.cpp
-                      src/settings/Preferences.cpp
+                      src/settings/Settings.cpp
                       src/callbacks/VideoCallbacks.cpp
                       src/callbacks/ConnectionCallbacks.cpp
                       src/callbacks/AudioCallbacks.cpp

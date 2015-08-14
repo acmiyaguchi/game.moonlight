@@ -17,7 +17,7 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
-#include "Preferences.h"
+#include "Settings.h"
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -31,17 +31,17 @@ namespace {
   const char *uid_filename = "uniqueid.dat";
 }
 
-Preferences::Preferences()
+Settings::Settings()
 {
   init(RES_720_60, false);
 }
 
-Preferences::Preferences(ResolutionType res, bool fullscreen)
+Settings::Settings(ResolutionType res, bool fullscreen)
 {
   init(res, fullscreen);
 }
 
-Preferences::~Preferences()
+Settings::~Settings()
 {
   if (m_resolution)
   {
@@ -49,7 +49,7 @@ Preferences::~Preferences()
   }
 }
 
-void Preferences::init(ResolutionType res, bool fullscreen)
+void Settings::init(ResolutionType res, bool fullscreen)
 {
   char buf[UID_CHARS+1];
   FILE *fd = fopen(uid_filename, "r");
@@ -76,48 +76,48 @@ void Preferences::init(ResolutionType res, bool fullscreen)
   m_uid = buf;
 }
 
-std::string Preferences::getHost() const
+std::string Settings::getHost() const
 {
   return m_host;
 }
 
-void Preferences::setHost(char* host)
+void Settings::setHost(char* host)
 {
   m_host = host;
 }
 
-Resolution Preferences::getResolution() const
+Resolution Settings::getResolution() const
 {
   return *m_resolution;
 }
 
-int Preferences::getBitrate() const
+int Settings::getBitrate() const
 {
   return m_bitrate;
 }
 
-bool Preferences::getFullscreen() const
+bool Settings::getFullscreen() const
 {
   return m_fullscreen;
 }
 
-void Preferences::setResolution(ResolutionType res)
+void Settings::setResolution(ResolutionType res)
 {
   delete m_resolution;
   m_resolution = new Resolution(res);
 }
 
-void Preferences::setBitrate(int bitrate)
+void Settings::setBitrate(int bitrate)
 {
   m_bitrate = bitrate;
 }
 
-void Preferences::setFullscreen(bool fullscreen)
+void Settings::setFullscreen(bool fullscreen)
 {
   m_fullscreen = fullscreen;
 }
 
-const std::string Preferences::getUniqueId() const
+const std::string Settings::getUniqueId() const
 {
   return m_uid;
 }

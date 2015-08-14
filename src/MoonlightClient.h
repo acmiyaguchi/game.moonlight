@@ -24,7 +24,7 @@
 
 namespace MOONLIGHT
 {
-  class Preferences;
+  class Settings;
   class NvHTTP;
 
   class CMoonlightClient
@@ -37,7 +37,7 @@ namespace MOONLIGHT
     bool pair();
   private:
     std::string m_host;
-    Preferences* m_prefs;
+    Settings* m_settings;
     NvHTTP* m_http;
   };
 }

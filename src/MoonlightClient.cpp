@@ -22,7 +22,7 @@
 #include "log/Log.h"
 #include "nvstream/NvHTTP.h"
 #include "nvstream/PairingManager.h"
-#include "settings/Preferences.h"
+#include "settings/Settings.h"
 #include "callbacks/Callbacks.h"
 
 #include <iostream>
@@ -33,13 +33,13 @@ using namespace MOONLIGHT;
 CMoonlightClient::CMoonlightClient(std::string host)
   : m_host(host)
 {
-  m_prefs = new Preferences();
-  m_http = new NvHTTP(m_host.c_str(), m_prefs->getUniqueId());
+  m_settings = new Settings();
+  m_http = new NvHTTP(m_host.c_str(), m_settings->getUniqueId());
 }
 
 MOONLIGHT::CMoonlightClient::~CMoonlightClient()
 {
-  delete m_prefs;
+  delete m_settings;
   delete m_http;
 }
 
@@ -95,7 +95,7 @@ void CMoonlightClient::stop()
 
 bool CMoonlightClient::pair()
 {
-  std::string serverInfo = m_http->getServerInfo(m_prefs->getUniqueId());
+  std::string serverInfo = m_http->getServerInfo(m_settings->getUniqueId());
   if(serverInfo.empty()) {
 	  return false;
   }

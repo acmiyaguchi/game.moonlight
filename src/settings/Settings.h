@@ -19,21 +19,45 @@
  */
 #pragma once
 
-#include "Preferences.h"
+#include <string>
+#include "Resolution.h"
 
 namespace MOONLIGHT
 {
-  class PreferencesManager
+  class Settings
   {
   public:
-    void writePreferences(Preferences prefs)
-    {
-    }
-    bool hasExistingPreferences()
-    {
-    }
-    Preferences getPreferences()
-    {
-    }
+    Settings();
+
+    Settings(ResolutionType res, bool fullscreen);
+
+    virtual ~Settings();
+
+    std::string getHost() const;
+
+    void setHost(char* host);
+
+    Resolution getResolution() const;
+
+    int getBitrate() const;
+
+    bool getFullscreen() const;
+
+    void setResolution(ResolutionType res);
+
+    void setBitrate(int bitrate);
+
+    void setFullscreen(bool fullscreen);
+
+    const std::string getUniqueId() const;
+
+  private:
+    void init(ResolutionType res, bool fullscreen);
+
+    Resolution* m_resolution;
+    int m_bitrate;
+    bool m_fullscreen;
+    std::string m_host;
+    std::string m_uid;
   };
 }

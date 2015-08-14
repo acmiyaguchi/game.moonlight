@@ -19,7 +19,6 @@
  */
 
 #include "MoonlightClient.h"
-#include "settings/Preferences.h"
 #include <iostream>
 #include <signal.h>
 #include <stdexcept>
