@@ -59,8 +59,7 @@ ADDON_STATUS ADDON_Create(void* callbacks, void* props)
 
     CLog::Get().SetPipe(new CLogConsole());
 
-    std::string host = "10.0.0.7";
-    CLIENT = new CMoonlightClient(host);
+    CLIENT = new CMoonlightClient();
     CMoonlightEnvironment::Get().Initialize(KODI, FRONTEND, CLIENT);
 
   } catch (const ADDON_STATUS& status)
@@ -92,7 +91,13 @@ void ADDON_Destroy()
 
 ADDON_STATUS ADDON_GetStatus()
 {
-  return KODI ? ADDON_STATUS_OK : ADDON_STATUS_UNKNOWN;
+  if (!KODI || !FRONTEND)
+	return ADDON_STATUS_UNKNOWN;
+
+  if (!Settings::Get().isInitialized())
+	return ADDON_STATUS_NEED_SETTINGS;
+
+  return ADDON_STATUS_OK;
 }
 
 bool ADDON_HasSettings()
@@ -144,10 +149,18 @@ GAME_ERROR LoadGameSpecial(SPECIAL_GAME_TYPE type, const char** urls, size_t url
 
 GAME_ERROR LoadStandalone(void)
 {
-  if(!CLIENT->pair()) {
+  if(!CLIENT->init()) {
+	  esyslog("Error initializing client");
 	  return GAME_ERROR_FAILED;
   }
-  CLIENT->start();
+  if(!CLIENT->pair()) {
+	  esyslog("Error pairing with server");
+	  return GAME_ERROR_FAILED;
+  }
+  if(!CLIENT->start()) {
+	  esyslog("Error starting client");
+	  return GAME_ERROR_FAILED;
+  }
   return GAME_ERROR_NO_ERROR;
 }
 

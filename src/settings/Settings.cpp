@@ -39,6 +39,7 @@ namespace {
 }
 
 Settings::Settings()
+  :m_initialized(false)
 {
   init(RES_720_60, false);
 }
@@ -64,7 +65,7 @@ void Settings::SetSetting(const std::string& strName, const void* value) {
 	}
 	else if (strName == SETTING_RESOLUTION)
 	{
-		int res = *static_cast<const int*>(value);
+		int res = atoi(static_cast<const char*>(value));
 		switch(res)
 		{
 		case 720:
@@ -95,16 +96,18 @@ void Settings::SetSetting(const std::string& strName, const void* value) {
 	}
 	else if (strName == SETTING_FRAMERATE)
 	{
-		int framerate = *static_cast<const int*>(value);
+		int framerate = atoi(static_cast<const char*>(value));
 		m_resolution->setFramerate(framerate);
 		dsyslog("Setting \"%s\" set to %i", SETTING_FRAMERATE, m_resolution->getFramerate());
 	}
 	else if (strName == SETTING_BITRATE)
 	{
-		int bitrate = *static_cast<const int*>(value);
+		int bitrate = atoi(static_cast<const char*>(value));
 		m_resolution->setBitrate(bitrate);
 		dsyslog("Setting \"%s\" set to %i", SETTING_BITRATE, m_resolution->getBitrate());
 	}
+
+	m_initialized = true;
 }
 
 void Settings::init(ResolutionType res, bool fullscreen)
@@ -128,29 +131,7 @@ void Settings::init(ResolutionType res, bool fullscreen)
   fclose(fd);
 
   m_resolution = new Resolution(res);
-  m_bitrate = m_resolution->getBitrate();
   m_fullscreen = fullscreen;
   m_host = "GeForce PC host";
   m_uid = buf;
-}
-
-void Settings::setHost(char* host)
-{
-  m_host = host;
-}
-
-void Settings::setResolution(ResolutionType res)
-{
-  delete m_resolution;
-  m_resolution = new Resolution(res);
-}
-
-void Settings::setBitrate(int bitrate)
-{
-  m_bitrate = bitrate;
-}
-
-void Settings::setFullscreen(bool fullscreen)
-{
-  m_fullscreen = fullscreen;
 }

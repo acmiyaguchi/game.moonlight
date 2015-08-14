@@ -30,25 +30,38 @@
 
 using namespace MOONLIGHT;
 
-CMoonlightClient::CMoonlightClient(std::string host)
-  : m_host(host)
+CMoonlightClient::CMoonlightClient()
+  : m_http(NULL)
 {
-  m_http = new NvHTTP(m_host.c_str(), Settings::Get().getUniqueId());
 }
 
 MOONLIGHT::CMoonlightClient::~CMoonlightClient()
 {
-  delete m_http;
+  if(m_http)
+    delete m_http;
 }
 
-void CMoonlightClient::start()
+bool CMoonlightClient::init()
+{
+  if (!Settings::Get().isInitialized()) {
+	  esyslog("CMoonlightClient::init: Settings are not initialized.");
+	  return false;
+  }
+  m_host = Settings::Get().getHost();
+  if(!m_http) {
+	  m_http = new NvHTTP(m_host.c_str(), Settings::Get().getUniqueId());
+  }
+  return true;
+}
+
+bool CMoonlightClient::start()
 {
   Resolution res = Settings::Get().getResolution();
   STREAM_CONFIGURATION config;
   config.width = res.getWidth();
   config.height = res.getHeight();
   config.fps = res.getFramerate();
-  config.bitrate = Settings::Get().getBitrate();
+  config.bitrate = res.getBitrate();
   config.packetSize = 1024;
 
   DECODER_RENDERER_CALLBACKS video_cb = getDecoderCallbacks();
@@ -57,16 +70,18 @@ void CMoonlightClient::start()
 
   isyslog("CMoonlightClient::start: Starting moonlight");
 
-  auto appList = m_http->getAppList();
+  std::vector<NvApp> appList = m_http->getAppList();
   if(appList.empty()) {
-    esyslog("Empty app list");
-    return;
+    esyslog("Empty Application list");
+    return false;
   }
 
-  auto app = appList[0];
+  NvApp app = appList[0];
   isyslog("AppTitle: %s ID: %i", app.getAppName().c_str(), app.getAppId());
 
   isyslog("CMoonlightClient::start: Launching app %s", app.getAppName().c_str());
+  isyslog("Starting with settings:\nhost: %s\nwidth: %i\nheight: %i\nfps: %i\nbitrate: %i",
+		  m_host.c_str(), config.width, config.height, config.fps, config.bitrate);
   bool launched = m_http->launchApp(&config, app.getAppId(), false, false);
   int num_retries = 5;
   if(!launched) {
@@ -78,11 +93,12 @@ void CMoonlightClient::start()
 		  }
 	  }
 	  if(!launched) {
-		  return;
+		  return false;
 	  }
   }
 
   LiStartConnection(m_host.c_str(), &config, &conn_cb, &video_cb, &audio_cb, NULL, 0, 0);
+  return true;
 }
 
 void CMoonlightClient::stop()

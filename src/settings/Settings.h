@@ -29,34 +29,26 @@ namespace MOONLIGHT
   public:
 	static Settings& Get();
 
+    void SetSetting(const std::string& strName, const void* value);
+
     virtual ~Settings();
+
+    bool isInitialized() { return m_initialized; }
 
     std::string getHost() const { return m_host; }
 
     Resolution getResolution() const { return *m_resolution; }
 
-    int getBitrate() const { return m_bitrate; }
-
     bool getFullscreen() const { return m_fullscreen; }
 
     const std::string getUniqueId() const { return m_uid; }
-
-    void SetSetting(const std::string& strName, const void* value);
-
-    void setHost(char* host);
-
-    void setResolution(ResolutionType res);
-
-    void setBitrate(int bitrate);
-
-    void setFullscreen(bool fullscreen);
 
   private:
     Settings();
     void init(ResolutionType res, bool fullscreen);
 
+    bool m_initialized;
     Resolution* m_resolution;
-    int m_bitrate;
     bool m_fullscreen;
     std::string m_host;
     std::string m_uid;
