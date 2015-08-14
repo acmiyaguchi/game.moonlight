@@ -35,7 +35,7 @@ namespace MOONLIGHT
     virtual ~NvHTTP();
     std::string baseUrlHttps;
     std::string baseUrlHttp;
-    std::string openHttpConnection(std::string url, bool enableReadTimeout);
+    std::string openHttpConnection(std::string url, bool enableTimeout);
     std::string getXmlString(std::string str, std::string tagname);
     NvApp getAppById(int id);
     //NvApp getAppByName(std::string name);
@@ -48,7 +48,7 @@ namespace MOONLIGHT
     PairState getPairState(std::string serverInfo);
     std::string getServerInfo(std::string uid);
     std::string getServerVersion(std::string serverInfo);
-    int launchApp(STREAM_CONFIGURATION* config, int appId, bool sops, bool localaudio);
+    bool launchApp(STREAM_CONFIGURATION* config, int appId, bool sops, bool localaudio);
     PairState pair(std::string pin);
     bool quitApp();
     bool resumeApp(STREAM_CONFIGURATION* config);

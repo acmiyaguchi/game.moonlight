@@ -37,8 +37,7 @@ namespace
   std::string keyFileName = "key.pem";
   const int HTTPS_PORT = 47984;
   const int HTTP_PORT = 47989;
-  const int CONNECTION_TIMEOUT = 3000;
-  const int READ_TIMEOUT = 5000;
+  const int CONNECTION_TIMEOUT = 5;
 }
 
 NvHTTP::NvHTTP(const char* host, std::string uid) :
@@ -92,8 +91,6 @@ std::string NvHTTP::getServerInfo(std::string uid)
     url << baseUrlHttp << "/serverinfo";
     resp = openHttpConnection(url.str(), true);
   }
-  // TODO: Incomplete function, need to default to http in the case that the
-  // client is unpaired with the host
 
   return resp;
 }
@@ -131,12 +128,19 @@ PairState NvHTTP::pair(std::string pin)
   return m_pm->pair(m_uid, pin);
 }
 
-std::string NvHTTP::openHttpConnection(std::string url, bool enableReadTimeout)
+std::string NvHTTP::openHttpConnection(std::string url, bool enableTimeout)
 {
   isyslog("Opening connection to %s", url.c_str());
   std::stringstream ss;
+  int timeout = 0;
+  if(enableTimeout) {
+	  timeout = CONNECTION_TIMEOUT;
+  }
   http_data* data = http_create_data();
-  http_request((char*)url.c_str(), data);
+  if(http_request((char*)url.c_str(), data, timeout) != 0) {
+	  http_free_data(data);
+	  return std::string("");
+  }
   ss.write(data->memory, data->size);
   http_free_data(data);
   return ss.str();
@@ -155,7 +159,7 @@ std::vector<NvApp> MOONLIGHT::NvHTTP::getAppList()
   return getAppList(resp);
 }
 
-int MOONLIGHT::NvHTTP::launchApp(STREAM_CONFIGURATION* config, int appId, bool sops, bool localaudio)
+bool MOONLIGHT::NvHTTP::launchApp(STREAM_CONFIGURATION* config, int appId, bool sops, bool localaudio)
 {
   initializeConfig(config);
   uint32_t rikey = 1;
@@ -167,8 +171,8 @@ int MOONLIGHT::NvHTTP::launchApp(STREAM_CONFIGURATION* config, int appId, bool s
       << "&rikey=" << m_pm->bytesToHex((unsigned char*)config->remoteInputAesKey, 16)
       << "&rikeyid=" << rikey
       << "&localAudioPlayMode=" << (int)localaudio;
-  std::string resp = openHttpConnection(url.str(), false);
-
+  std::string resp = openHttpConnection(url.str(), true);
+  return !resp.empty();
 }
 
 bool MOONLIGHT::NvHTTP::resumeApp(STREAM_CONFIGURATION* config)

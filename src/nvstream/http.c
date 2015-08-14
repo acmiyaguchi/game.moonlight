@@ -59,9 +59,10 @@ void http_init() {
   curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
 }
 
-int http_request(char* url, struct http_data* data) {
+int http_request(char* url, struct http_data* data, int timeout) {
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
   curl_easy_setopt(curl, CURLOPT_URL, url);
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
 
   if (data->size > 0) {
     free(data->memory);
@@ -76,7 +77,6 @@ int http_request(char* url, struct http_data* data) {
   
   if(res != CURLE_OK) {
     fprintf(stderr, "Connection failed: %s\n", curl_easy_strerror(res));
-    //exit(EXIT_FAILURE);
   }
   
   return res;

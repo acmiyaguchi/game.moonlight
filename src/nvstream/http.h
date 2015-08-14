@@ -30,7 +30,7 @@ struct http_data {
 };
 
 void http_init();
-int http_request(char* url, struct http_data* data);
+int http_request(char* url, struct http_data* data, int timeout);
 
 struct http_data* http_create_data();
 void http_free_data(struct http_data* data);

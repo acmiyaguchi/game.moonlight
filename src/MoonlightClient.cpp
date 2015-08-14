@@ -66,8 +66,23 @@ void CMoonlightClient::start()
 
   auto app = appList[0];
   isyslog("AppTitle: %s ID: %i", app.getAppName().c_str(), app.getAppId());
-  m_http->launchApp(&config, app.getAppId(), false, false);
+
   isyslog("CMoonlightClient::start: Launching app %s", app.getAppName().c_str());
+  bool launched = m_http->launchApp(&config, app.getAppId(), false, false);
+  int num_retries = 5;
+  if(!launched) {
+	  for(int i = 0; i < num_retries; i++) {
+		  isyslog("CMoonlightClient::start: retrying launch...");
+		  launched = m_http->launchApp(&config, app.getAppId(), false, false);
+		  if (launched) {
+			  break;
+		  }
+	  }
+	  if(!launched) {
+		  return;
+	  }
+  }
+
   LiStartConnection(m_host.c_str(), &config, &conn_cb, &video_cb, &audio_cb, NULL, 0, 0);
 }
 
@@ -81,6 +96,9 @@ void CMoonlightClient::stop()
 bool CMoonlightClient::pair()
 {
   std::string serverInfo = m_http->getServerInfo(m_prefs->getUniqueId());
+  if(serverInfo.empty()) {
+	  return false;
+  }
   if (m_http->getPairState(serverInfo) == PairState::PAIRED)
   {
      isyslog("Already paired");

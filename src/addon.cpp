@@ -146,14 +146,17 @@ GAME_ERROR LoadGameSpecial(SPECIAL_GAME_TYPE type, const char** urls, size_t url
 
 GAME_ERROR LoadStandalone(void)
 {
-  CLIENT->pair();
+  if(!CLIENT->pair()) {
+	  return GAME_ERROR_FAILED;
+  }
   CLIENT->start();
   return GAME_ERROR_NO_ERROR;
 }
 
 GAME_ERROR UnloadGame(void)
 {
-  return GAME_ERROR_FAILED;
+  CLIENT->stop();
+  return GAME_ERROR_NO_ERROR;
 }
 
 GAME_ERROR GetGameInfo(game_system_av_info* info)
