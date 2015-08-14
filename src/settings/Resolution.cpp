@@ -58,6 +58,11 @@ Resolution::Resolution(ResolutionType type)
   }
 }
 
+Resolution::Resolution(int width, int height, int framerate, int bitrate)
+{
+  setResolution(width, height, framerate, bitrate);
+}
+
 void Resolution::setResolution(int width, int height, int framerate,
     int bitrate)
 {
@@ -86,3 +91,20 @@ int Resolution::getBitrate() const
 {
   return m_bitrate;
 }
+
+void Resolution::setDimensions(int width, int height)
+{
+	m_width = width;
+	m_height = height;
+}
+
+void Resolution::setFramerate(int framerate)
+{
+	m_framerate = framerate;
+}
+
+void Resolution::setBitrate(int bitrate)
+{
+	m_bitrate = bitrate;
+}
+

@@ -22,6 +22,7 @@
 #include "MoonlightEnvironment.h"
 #include "log/Log.h"
 #include "log/LogConsole.h"
+#include "settings/Settings.h"
 #include "utils/CommonMacros.h"
 
 #include "kodi/libXBMC_addon.h"
@@ -37,9 +38,6 @@ using namespace MOONLIGHT;
 CHelper_libXBMC_addon* KODI = NULL;
 CHelper_libKODI_game* FRONTEND = NULL;
 CMoonlightClient* CLIENT = NULL;
-
-const size_t m_width = 800;
-const size_t m_height = 600;
 
 extern "C"
 {
@@ -109,8 +107,8 @@ unsigned int ADDON_GetSettings(ADDON_StructSetting ***sSet)
 
 ADDON_STATUS ADDON_SetSetting(const char *settingName, const void *settingValue)
 {
-  if (!settingName || !settingValue)
-    return ADDON_STATUS_UNKNOWN;
+  if (settingName && settingValue)
+    Settings::Get().SetSetting(settingName, settingValue);
 
   return ADDON_STATUS_OK;
 }
@@ -161,12 +159,13 @@ GAME_ERROR UnloadGame(void)
 
 GAME_ERROR GetGameInfo(game_system_av_info* info)
 {
-  info->geometry.base_width = m_width;
-  info->geometry.base_height = m_height;
-  info->geometry.max_width = m_width;
-  info->geometry.max_height = m_height;
+  Resolution res = Settings::Get().getResolution();
+  info->geometry.base_width = res.getWidth();
+  info->geometry.base_height = res.getHeight();
+  info->geometry.max_width = res.getWidth();
+  info->geometry.max_height = res.getHeight();
   info->geometry.aspect_ratio = 0.0;
-  info->timing.fps = 60.0;
+  info->timing.fps = static_cast<float>(res.getFramerate());
   info->timing.sample_rate = 0.0;
 
   return GAME_ERROR_NO_ERROR;

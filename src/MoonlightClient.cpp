@@ -43,11 +43,12 @@ MOONLIGHT::CMoonlightClient::~CMoonlightClient()
 
 void CMoonlightClient::start()
 {
+  Resolution res = Settings::Get().getResolution();
   STREAM_CONFIGURATION config;
-  config.width = 800;
-  config.height = 600;
-  config.fps = 30;
-  config.bitrate = 3500;
+  config.width = res.getWidth();
+  config.height = res.getHeight();
+  config.fps = res.getFramerate();
+  config.bitrate = Settings::Get().getBitrate();
   config.packetSize = 1024;
 
   DECODER_RENDERER_CALLBACKS video_cb = getDecoderCallbacks();

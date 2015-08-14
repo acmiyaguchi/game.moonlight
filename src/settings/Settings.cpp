@@ -18,6 +18,7 @@
  *
  */
 #include "Settings.h"
+#include "log/Log.h"
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -25,6 +26,12 @@
 #include <openssl/rand.h>
 
 using namespace MOONLIGHT;
+
+#define SETTING_HOST		"host"
+#define SETTING_RESOLUTION	"resolution"
+#define SETTING_FULLSCREEN	"fullscreen"
+#define SETTING_FRAMERATE	"framerate"
+#define SETTING_BITRATE		"bitrate"
 
 #define UID_CHARS 16
 namespace {
@@ -47,6 +54,57 @@ Settings::~Settings()
   {
     delete m_resolution;
   }
+}
+
+void Settings::SetSetting(const std::string& strName, const void* value) {
+	if (strName == SETTING_HOST)
+	{
+		m_host = static_cast<const char*>(value);
+		dsyslog("Setting \"%s\" set to %s", SETTING_HOST, m_host.c_str());
+	}
+	else if (strName == SETTING_RESOLUTION)
+	{
+		int res = *static_cast<const int*>(value);
+		switch(res)
+		{
+		case 720:
+			m_resolution->setDimensions(1280, 720);
+			break;
+		case 768:
+			m_resolution->setDimensions(1366, 768);
+			break;
+		case 900:
+			m_resolution->setDimensions(1600, 900);
+			break;
+		case 1050:
+			m_resolution->setDimensions(1680, 1050);
+			break;
+		case 1080:
+			m_resolution->setDimensions(1920, 1080);
+			break;
+		default:
+			dsyslog("invalid dimension of %i", res);
+		}
+		dsyslog("Setting \"%s\" set to %i x %i",
+				SETTING_RESOLUTION, m_resolution->getWidth(), m_resolution->getHeight());
+	}
+	else if (strName == SETTING_FULLSCREEN)
+	{
+		m_fullscreen = *static_cast<const bool*>(value);
+		dsyslog("Setting \"%s\" set to %s", SETTING_FULLSCREEN, m_fullscreen ? "true" : "false");
+	}
+	else if (strName == SETTING_FRAMERATE)
+	{
+		int framerate = *static_cast<const int*>(value);
+		m_resolution->setFramerate(framerate);
+		dsyslog("Setting \"%s\" set to %i", SETTING_FRAMERATE, m_resolution->getFramerate());
+	}
+	else if (strName == SETTING_BITRATE)
+	{
+		int bitrate = *static_cast<const int*>(value);
+		m_resolution->setBitrate(bitrate);
+		dsyslog("Setting \"%s\" set to %i", SETTING_BITRATE, m_resolution->getBitrate());
+	}
 }
 
 void Settings::init(ResolutionType res, bool fullscreen)

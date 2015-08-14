@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
 	<category label="6">
-   	<setting id="host_ip" type="text" label="30000" default="0.0.0.0"/>
+   	<setting id="host" type="ipaddress" label="30000" default="0.0.0.0"/>
+   	<setting id="resolution" type="labelenum" label="30001" values="720|768|900|1050|1080"/>
+   	<setting id="framerate" type="labelenum" label="30002" values="30|60"/>
+   	<setting id="fullscreen" type="bool" label="30003" default="true"/>
+   	<setting id="bitrate" type="number" label="30004" default="3500"/>
 	</category>
 </settings>

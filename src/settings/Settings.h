@@ -41,6 +41,8 @@ namespace MOONLIGHT
 
     const std::string getUniqueId() const { return m_uid; }
 
+    void SetSetting(const std::string& strName, const void* value);
+
     void setHost(char* host);
 
     void setResolution(ResolutionType res);
@@ -48,7 +50,6 @@ namespace MOONLIGHT
     void setBitrate(int bitrate);
 
     void setFullscreen(bool fullscreen);
-
 
   private:
     Settings();

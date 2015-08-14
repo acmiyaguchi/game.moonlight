@@ -40,6 +40,8 @@ namespace MOONLIGHT
   public:
     Resolution(ResolutionType type);
 
+    Resolution(int width, int height, int framerate, int bitrate);
+
     int getWidth() const;
 
     int getHeight() const;
@@ -47,6 +49,12 @@ namespace MOONLIGHT
     int getFramerate() const;
 
     int getBitrate() const;
+
+    void setDimensions(int width, int height);
+
+    void setFramerate(int framerate);
+
+    void setBitrate(int bitrate);
 
   private:
     void setResolution(int width, int height, int framerate, int bitrate);

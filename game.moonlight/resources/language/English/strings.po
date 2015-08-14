@@ -19,3 +19,20 @@ msgstr ""
 msgctxt "#30000"
 msgid "Host IP"
 msgstr ""
+
+msgctxt "#30001"
+msgid "Resolution"
+msgstr ""
+
+msgctxt "#30002"
+msgid "Framerate"
+msgstr ""
+
+msgctxt "#30003"
+msgid "Fullscreen"
+msgstr ""
+
+msgctxt "#30004"
+msgid "Bitrate"
+msgstr ""
+
