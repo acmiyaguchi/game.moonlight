@@ -23,32 +23,17 @@
 #include "kodi/libKODI_game.h"
 #include "Limelight.h"
 
-#include <platform/threads/threads.h>
-#include <queue>
-
 using namespace MOONLIGHT;
 using namespace PLATFORM;
 
-typedef std::vector<uint8_t> decode_unit;
-const int MAX_PACKET_LENGTH = 64;
-
 static CHelper_libKODI_game* frontend = NULL;
-
-static std::queue<decode_unit> data_queue;
-static std::queue<decode_unit> render_queue;
-static CMutex mutex;
-static CEvent event;
 static int m_width = 0;
 static int m_height = 0;
 
-void* decode_and_render(void* args);
 
 void decoder_renderer_setup(int width, int height, int redrawRate, void* context, int drFlags)
 {
   isyslog("VideoCallbacks::Setup");
-
-  thread_t thread;
-  ThreadsCreate(thread, decode_and_render, NULL);
 
   m_width = width;
   m_height = height;
@@ -64,38 +49,11 @@ void decoder_renderer_cleanup()
 	}
 }
 
-void* decode_and_render(void* args)
-{
-  for(;;) {
-    // Grab lock, grab data, unlock
-    if(render_queue.empty())
-    {
-      mutex.Lock();
-      if(data_queue.empty())
-      {
-        mutex.Unlock();
-        event.Wait(); // wait for more data on the queue
-        continue;
-      }
-      else
-      {
-        render_queue.swap(data_queue);
-      }
-      mutex.Unlock();
-    }
-
-    decode_unit buffer = render_queue.front();
-    render_queue.pop();
-
-    frontend->VideoFrameH264(buffer.data(), buffer.size(), m_width, m_height);
-  }
-}
-
 int decoder_renderer_submit_decode_unit(PDECODE_UNIT decodeUnit)
 {
   int len = 0;
 
-  decode_unit buffer;
+  std::vector<uint8_t> buffer;
   PLENTRY entry = decodeUnit->bufferList;
   while (entry != NULL)
   {
@@ -103,17 +61,7 @@ int decoder_renderer_submit_decode_unit(PDECODE_UNIT decodeUnit)
     entry = entry->next;
   }
 
-  mutex.Lock();
-  if(data_queue.size() < MAX_PACKET_LENGTH)
-  {
-    data_queue.push(buffer);
-    event.Signal();
-  }
-  else
-  {
-    isyslog("Discarding packet due to queue overflow");
-  }
-  mutex.Unlock();
+  frontend->VideoFrameH264(buffer.data(), buffer.size(), m_width, m_height);
 
   return DR_OK;
 }
