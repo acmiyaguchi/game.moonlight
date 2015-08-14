@@ -20,6 +20,7 @@
 
 #include "MoonlightClient.h"
 #include "MoonlightEnvironment.h"
+#include "input/InputManager.h"
 #include "log/Log.h"
 #include "log/LogConsole.h"
 #include "settings/Settings.h"
@@ -161,12 +162,14 @@ GAME_ERROR LoadStandalone(void)
 	  esyslog("Error starting client");
 	  return GAME_ERROR_FAILED;
   }
+  CInputManager::Get().OpenPort();
   return GAME_ERROR_NO_ERROR;
 }
 
 GAME_ERROR UnloadGame(void)
 {
   CLIENT->stop();
+  CInputManager::Get().ClosePort();
   return GAME_ERROR_NO_ERROR;
 }
 
@@ -214,7 +217,10 @@ void UpdatePort(unsigned int port, bool connected, const game_controller* connec
 
 bool InputEvent(unsigned int port, const game_input_event* event)
 {
-  return false;
+  if (!event)
+    return false;
+
+  return CInputManager::Get().InputEvent(port, *event);
 }
 
 size_t SerializeSize(void)

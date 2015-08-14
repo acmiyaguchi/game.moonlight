@@ -34,6 +34,7 @@ list(APPEND DEPLIBS ${kodiplatform_LIBRARIES}
 
 set(MOONLIGHT_SOURCES src/MoonlightClient.cpp
                       src/MoonlightEnvironment.cpp
+                      src/input/InputManager.cpp
                       src/log/Log.cpp
                       src/log/LogAddon.cpp
                       src/log/LogConsole.cpp
