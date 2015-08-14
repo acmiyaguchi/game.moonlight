@@ -36,9 +36,9 @@ Settings::Settings()
   init(RES_720_60, false);
 }
 
-Settings::Settings(ResolutionType res, bool fullscreen)
-{
-  init(res, fullscreen);
+Settings& MOONLIGHT::Settings::Get() {
+	static Settings _instance;
+	return _instance;
 }
 
 Settings::~Settings()
@@ -76,29 +76,9 @@ void Settings::init(ResolutionType res, bool fullscreen)
   m_uid = buf;
 }
 
-std::string Settings::getHost() const
-{
-  return m_host;
-}
-
 void Settings::setHost(char* host)
 {
   m_host = host;
-}
-
-Resolution Settings::getResolution() const
-{
-  return *m_resolution;
-}
-
-int Settings::getBitrate() const
-{
-  return m_bitrate;
-}
-
-bool Settings::getFullscreen() const
-{
-  return m_fullscreen;
 }
 
 void Settings::setResolution(ResolutionType res)
@@ -115,9 +95,4 @@ void Settings::setBitrate(int bitrate)
 void Settings::setFullscreen(bool fullscreen)
 {
   m_fullscreen = fullscreen;
-}
-
-const std::string Settings::getUniqueId() const
-{
-  return m_uid;
 }

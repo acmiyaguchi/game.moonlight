@@ -33,13 +33,11 @@ using namespace MOONLIGHT;
 CMoonlightClient::CMoonlightClient(std::string host)
   : m_host(host)
 {
-  m_settings = new Settings();
-  m_http = new NvHTTP(m_host.c_str(), m_settings->getUniqueId());
+  m_http = new NvHTTP(m_host.c_str(), Settings::Get().getUniqueId());
 }
 
 MOONLIGHT::CMoonlightClient::~CMoonlightClient()
 {
-  delete m_settings;
   delete m_http;
 }
 
@@ -95,7 +93,7 @@ void CMoonlightClient::stop()
 
 bool CMoonlightClient::pair()
 {
-  std::string serverInfo = m_http->getServerInfo(m_settings->getUniqueId());
+  std::string serverInfo = m_http->getServerInfo(Settings::Get().getUniqueId());
   if(serverInfo.empty()) {
 	  return false;
   }

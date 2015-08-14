@@ -27,21 +27,21 @@ namespace MOONLIGHT
   class Settings
   {
   public:
-    Settings();
-
-    Settings(ResolutionType res, bool fullscreen);
+	static Settings& Get();
 
     virtual ~Settings();
 
-    std::string getHost() const;
+    std::string getHost() const { return m_host; }
+
+    Resolution getResolution() const { return *m_resolution; }
+
+    int getBitrate() const { return m_bitrate; }
+
+    bool getFullscreen() const { return m_fullscreen; }
+
+    const std::string getUniqueId() const { return m_uid; }
 
     void setHost(char* host);
-
-    Resolution getResolution() const;
-
-    int getBitrate() const;
-
-    bool getFullscreen() const;
 
     void setResolution(ResolutionType res);
 
@@ -49,9 +49,9 @@ namespace MOONLIGHT
 
     void setFullscreen(bool fullscreen);
 
-    const std::string getUniqueId() const;
 
   private:
+    Settings();
     void init(ResolutionType res, bool fullscreen);
 
     Resolution* m_resolution;
