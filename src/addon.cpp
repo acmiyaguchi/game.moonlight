@@ -205,61 +205,6 @@ bool InputEvent(unsigned int port, const game_input_event* event)
   return false;
 }
 
-GAME_ERROR DiskSetEjectState(GAME_EJECT_STATE ejected)
-{
-  return GAME_ERROR_FAILED;
-}
-
-GAME_EJECT_STATE DiskGetEjectState(void)
-{
-  return GAME_NOT_EJECTED;
-}
-
-unsigned DiskGetImageIndex(void)
-{
-  return 0;
-}
-
-GAME_ERROR DiskSetImageIndex(unsigned index)
-{
-  return GAME_ERROR_FAILED;
-}
-
-unsigned DiskGetNumImages(void)
-{
-  return 0;
-}
-
-GAME_ERROR DiskReplaceImageIndex(unsigned index, const char* url)
-{
-  return GAME_ERROR_FAILED;
-}
-
-GAME_ERROR DiskAddImageIndex(void)
-{
-  return GAME_ERROR_FAILED;
-}
-
-GAME_ERROR CameraInitialized(void)
-{
-  return GAME_ERROR_FAILED;
-}
-
-GAME_ERROR CameraDeinitialized(void)
-{
-  return GAME_ERROR_FAILED;
-}
-
-GAME_ERROR CameraFrameRawBuffer(const uint32_t* buffer, unsigned width, unsigned height, size_t pitch)
-{
-  return GAME_ERROR_FAILED;
-}
-
-GAME_ERROR CameraFrameOpenglTexture(unsigned texture_id, unsigned texture_target, const float* affine)
-{
-  return GAME_ERROR_FAILED;
-}
-
 size_t SerializeSize(void)
 {
   return 0;
