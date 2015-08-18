@@ -31,6 +31,7 @@ using namespace MOONLIGHT;
 #define SETTING_RESOLUTION	"resolution"
 #define SETTING_FULLSCREEN	"fullscreen"
 #define SETTING_FRAMERATE	"framerate"
+#define SETTING_LOCALAUDIO	"localaudio"
 #define SETTING_BITRATE		"bitrate"
 
 #define UID_CHARS 16
@@ -94,6 +95,11 @@ void Settings::SetSetting(const std::string& strName, const void* value) {
 		m_fullscreen = *static_cast<const bool*>(value);
 		dsyslog("Setting \"%s\" set to %s", SETTING_FULLSCREEN, m_fullscreen ? "true" : "false");
 	}
+	else if (strName == SETTING_LOCALAUDIO)
+	{
+		m_localaudio = *static_cast<const bool*>(value);
+		dsyslog("Setting \"%s\" set to %s", SETTING_LOCALAUDIO, m_localaudio ? "true" : "false");
+	}
 	else if (strName == SETTING_FRAMERATE)
 	{
 		int framerate = atoi(static_cast<const char*>(value));
@@ -134,4 +140,5 @@ void Settings::init(ResolutionType res, bool fullscreen)
   m_fullscreen = fullscreen;
   m_host = "GeForce PC host";
   m_uid = buf;
+  m_localaudio = false;
 }

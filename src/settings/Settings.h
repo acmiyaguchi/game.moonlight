@@ -41,6 +41,8 @@ namespace MOONLIGHT
 
     bool getFullscreen() const { return m_fullscreen; }
 
+    bool getLocalAudio() const { return m_localaudio; }
+
     const std::string getUniqueId() const { return m_uid; }
 
   private:
@@ -50,6 +52,7 @@ namespace MOONLIGHT
     bool m_initialized;
     Resolution* m_resolution;
     bool m_fullscreen;
+    bool m_localaudio;
     std::string m_host;
     std::string m_uid;
   };

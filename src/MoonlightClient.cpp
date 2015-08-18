@@ -82,12 +82,13 @@ bool CMoonlightClient::start()
   isyslog("CMoonlightClient::start: Launching app %s", app.getAppName().c_str());
   isyslog("Starting with settings:\nhost: %s\nwidth: %i\nheight: %i\nfps: %i\nbitrate: %i",
 		  m_host.c_str(), config.width, config.height, config.fps, config.bitrate);
-  bool launched = m_http->launchApp(&config, app.getAppId(), false, false);
+  bool localAudio = !Settings::Get().getLocalAudio();
+  bool launched = m_http->launchApp(&config, app.getAppId(), false, localAudio);
   int num_retries = 5;
   if(!launched) {
 	  for(int i = 0; i < num_retries; i++) {
 		  isyslog("CMoonlightClient::start: retrying launch...");
-		  launched = m_http->launchApp(&config, app.getAppId(), false, false);
+		  launched = m_http->launchApp(&config, app.getAppId(), false, localAudio);
 		  if (launched) {
 			  break;
 		  }

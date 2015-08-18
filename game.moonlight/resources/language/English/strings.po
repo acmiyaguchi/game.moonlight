@@ -36,3 +36,7 @@ msgctxt "#30004"
 msgid "Bitrate"
 msgstr ""
 
+msgctxt "#30005"
+msgid "Enable LocalAudio"
+msgstr ""
+

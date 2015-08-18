@@ -5,6 +5,7 @@
    	<setting id="resolution" type="labelenum" label="30001" values="720|768|900|1050|1080"/>
    	<setting id="framerate" type="labelenum" label="30002" values="30|60"/>
    	<setting id="fullscreen" type="bool" label="30003" default="true"/>
+   	<setting id="localaudio" type="bool" label="30005" default="false"/>
    	<setting id="bitrate" type="number" label="30004" default="3500" />
 	</category>
 </settings>
