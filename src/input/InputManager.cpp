@@ -22,6 +22,7 @@
 #include "InputManager.h"
 #include "Limelight.h"
 #include "log/Log.h"
+#include <climits>
 
 #include "kodi/libKODI_game.h"
 
@@ -103,10 +104,18 @@ bool CInputManager::InputEvent(unsigned int port, const game_input_event& event)
   }
   case GAME_INPUT_EVENT_ANALOG_BUTTON:
 	  break;
-
-  case GAME_INPUT_EVENT_ANALOG_STICK:
+  case GAME_INPUT_EVENT_ANALOG_STICK: {
+	  short int x = (short int)(event.analog_stick.x * SHRT_MAX);
+	  short int y = (short int)(event.analog_stick.y * SHRT_MAX);
+	  isyslog("Analog button (%f, %f) (%i, %i)", event.analog_stick.x, event.analog_stick.y, x, y);
+	  if (strFeatureName == "leftstick") {
+		  LiSendControllerEvent(0, 0, 0, x, y, 0, 0);
+	  }
+	  else if (strFeatureName == "rightstick"){
+		  LiSendControllerEvent(0, 0, 0, 0, 0, x, y);
+	  }
 	  break;
-
+  }
   case GAME_INPUT_EVENT_ACCELEROMETER:
 	  break;
 
