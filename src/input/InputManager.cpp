@@ -69,6 +69,7 @@ int CInputManager::GetIndex(const std::string& strControllerId, const std::strin
     if (strFeatureName == "y")            return Y_FLAG;
     if (strFeatureName == "start")        return PLAY_FLAG;
     if (strFeatureName == "back")         return BACK_FLAG;
+    if (strFeatureName == "guide")		  return SPECIAL_FLAG;
     if (strFeatureName == "leftbumper")   return LB_FLAG;
     if (strFeatureName == "rightbumper")  return RB_FLAG;
     if (strFeatureName == "leftthumb")    return LS_CLK_FLAG;
