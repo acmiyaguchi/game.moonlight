@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon
   id="game.moonlight"
-  version="0.0.2"
+  version="1.0.0"
   name="Moonlight Client"
   provider-name="acmiyaguchi">
   <requires>
@@ -22,7 +22,7 @@
     <summary lang="en">Kodi Moonlight Client</summary>
     <description lang="en">Moonlight Client for Kodi.</description>
     <platform>all</platform>
-    <noicon>true</noicon>
+    <noicon>false</noicon>
     <nofanart>true</nofanart>
   </extension>
 </addon>
