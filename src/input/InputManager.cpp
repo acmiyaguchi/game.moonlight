@@ -94,26 +94,32 @@ bool CInputManager::InputEvent(unsigned int port, const game_input_event& event)
   switch (event.type)
   {
   case GAME_INPUT_EVENT_DIGITAL_BUTTON: {
-	  int button = 0;
 	  int index = GetIndex(strControllerId, strFeatureName);
 	  if (event.digital_button.pressed)
-		  button |= index;
+		  m_state.button |= index;
 	  else
-		  button &= ~index;
-	  LiSendControllerEvent(button, 0, 0, 0, 0, 0, 0);
+		  m_state.button &= ~index;
 	  break;
   }
   case GAME_INPUT_EVENT_ANALOG_BUTTON:
+	  if (strFeatureName == "lefttrigger") {
+		  m_state.leftTrigger = (unsigned char)(event.analog_button.magnitude * UCHAR_MAX);
+	  }
+	  if (strFeatureName == "righttrigger") {
+		  m_state.rightTrigger = (unsigned char)(event.analog_button.magnitude * UCHAR_MAX);
+	  }
 	  break;
   case GAME_INPUT_EVENT_ANALOG_STICK: {
 	  short int x = (short int)(event.analog_stick.x * SHRT_MAX);
 	  short int y = (short int)(event.analog_stick.y * SHRT_MAX);
 	  isyslog("Analog button (%f, %f) (%i, %i)", event.analog_stick.x, event.analog_stick.y, x, y);
 	  if (strFeatureName == "leftstick") {
-		  LiSendControllerEvent(0, 0, 0, x, y, 0, 0);
+		  m_state.leftStickX = x;
+		  m_state.leftStickY = y;
 	  }
 	  else if (strFeatureName == "rightstick"){
-		  LiSendControllerEvent(0, 0, 0, 0, 0, x, y);
+		  m_state.rightStickX = x;
+		  m_state.rightStickY = y;
 	  }
 	  break;
   }
@@ -121,11 +127,7 @@ bool CInputManager::InputEvent(unsigned int port, const game_input_event& event)
 	  break;
 
   case GAME_INPUT_EVENT_KEY:
-  {
-	  char action = event.key.pressed ? KEY_ACTION_DOWN : KEY_ACTION_UP;
-	  LiSendKeyboardEvent((short)event.key.character, action, event.key.modifiers);
 	  break;
-  }
 
   case GAME_INPUT_EVENT_RELATIVE_POINTER:
 	  break;
@@ -136,5 +138,6 @@ bool CInputManager::InputEvent(unsigned int port, const game_input_event& event)
   default:
 	  break;
   }
+  LiSendControllerEvent(m_state.button, m_state.leftTrigger, m_state.rightTrigger, m_state.leftStickX, m_state.leftStickY, m_state.rightStickX, m_state.rightStickY);
   return true;
 }

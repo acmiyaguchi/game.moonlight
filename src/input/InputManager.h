@@ -42,5 +42,17 @@ namespace MOONLIGHT
   private:
     int GetIndex(const std::string& strControllerId, const std::string& strFeatureName);
     bool m_port_opened;
+
+    struct InputState
+    {
+      InputState(): button(0), leftStickX(0), leftTrigger(0), rightTrigger(0),
+          leftStickY(0), rightStickX(0), rightStickY(0) {}
+      int button;
+      unsigned char leftTrigger, rightTrigger;
+      short leftStickX, leftStickY;
+      short rightStickX, rightStickY;
+    };
+
+    InputState m_state;
   };
 }
