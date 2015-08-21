@@ -24,13 +24,16 @@
 
 namespace MOONLIGHT
 {
-  class CLogSyslog : public ILog
+  class CLogSyslog: public ILog
   {
   public:
     CLogSyslog(void);
     virtual ~CLogSyslog(void);
 
     virtual void Log(SYS_LOG_LEVEL level, const char* logline);
-    virtual SYS_LOG_TYPE Type(void) const { return SYS_LOG_TYPE_SYSLOG; }
+    virtual SYS_LOG_TYPE Type(void) const
+        {
+      return SYS_LOG_TYPE_SYSLOG;
+    }
   };
 }

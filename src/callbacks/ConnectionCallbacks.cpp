@@ -20,7 +20,8 @@ void connection_display_transient_message(char *msg)
 
 CONNECTION_LISTENER_CALLBACKS MOONLIGHT::getConnectionCallbacks()
 {
-  CONNECTION_LISTENER_CALLBACKS callbacks = {
+  CONNECTION_LISTENER_CALLBACKS callbacks =
+  {
       NULL,
       NULL,
       NULL,

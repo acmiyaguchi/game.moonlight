@@ -19,7 +19,10 @@
  */
 #pragma once
 
-namespace ADDON { class CHelper_libXBMC_addon; }
+namespace ADDON
+{
+  class CHelper_libXBMC_addon;
+}
 class CHelper_libKODI_game;
 
 namespace MOONLIGHT
@@ -34,14 +37,23 @@ namespace MOONLIGHT
     void Initialize(ADDON::CHelper_libXBMC_addon* kodi, CHelper_libKODI_game* frontend, CMoonlightClient* client);
     void Deinitialize(void);
 
-    ADDON::CHelper_libXBMC_addon* GetKODI(void)     { return m_kodi; }
-    CHelper_libKODI_game*         GetFrontend(void) { return m_frontend; }
-    CMoonlightClient*             GetClient(void)   { return m_client; }
+    ADDON::CHelper_libXBMC_addon* GetKODI(void)
+    {
+      return m_kodi;
+    }
+    CHelper_libKODI_game* GetFrontend(void)
+    {
+      return m_frontend;
+    }
+    CMoonlightClient* GetClient(void)
+    {
+      return m_client;
+    }
   private:
     CMoonlightEnvironment(void);
 
     ADDON::CHelper_libXBMC_addon* m_kodi;
-    CHelper_libKODI_game*         m_frontend;
-    CMoonlightClient*             m_client;
+    CHelper_libKODI_game* m_frontend;
+    CMoonlightClient* m_client;
   };
 }

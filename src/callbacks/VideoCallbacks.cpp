@@ -30,7 +30,6 @@ static CHelper_libKODI_game* frontend = NULL;
 static int m_width = 0;
 static int m_height = 0;
 
-
 void decoder_renderer_setup(int width, int height, int redrawRate, void* context, int drFlags)
 {
   isyslog("VideoCallbacks::Setup");
@@ -42,11 +41,12 @@ void decoder_renderer_setup(int width, int height, int redrawRate, void* context
 
 void decoder_renderer_cleanup()
 {
-	isyslog("VideoCallbacks::Cleanup");
+  isyslog("VideoCallbacks::Cleanup");
 
-	if(frontend) {
-	  frontend = NULL;
-	}
+  if (frontend)
+  {
+    frontend = NULL;
+  }
 }
 
 int decoder_renderer_submit_decode_unit(PDECODE_UNIT decodeUnit)
@@ -68,7 +68,8 @@ int decoder_renderer_submit_decode_unit(PDECODE_UNIT decodeUnit)
 
 DECODER_RENDERER_CALLBACKS MOONLIGHT::getDecoderCallbacks()
 {
-  DECODER_RENDERER_CALLBACKS callbacks = {
+  DECODER_RENDERER_CALLBACKS callbacks =
+  {
       decoder_renderer_setup,
       decoder_renderer_cleanup,
       decoder_renderer_submit_decode_unit

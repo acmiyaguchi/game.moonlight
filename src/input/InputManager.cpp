@@ -63,21 +63,36 @@ int CInputManager::GetIndex(const std::string& strControllerId, const std::strin
   // Handle default controller
   if (strControllerId == "game.controller.default")
   {
-    if (strFeatureName == "a")            return A_FLAG;
-    if (strFeatureName == "b")            return B_FLAG;
-    if (strFeatureName == "x")            return X_FLAG;
-    if (strFeatureName == "y")            return Y_FLAG;
-    if (strFeatureName == "start")        return PLAY_FLAG;
-    if (strFeatureName == "back")         return BACK_FLAG;
-    if (strFeatureName == "guide")		  return SPECIAL_FLAG;
-    if (strFeatureName == "leftbumper")   return LB_FLAG;
-    if (strFeatureName == "rightbumper")  return RB_FLAG;
-    if (strFeatureName == "leftthumb")    return LS_CLK_FLAG;
-    if (strFeatureName == "rightthumb")   return RS_CLK_FLAG;
-    if (strFeatureName == "up")           return UP_FLAG;
-    if (strFeatureName == "down")         return DOWN_FLAG;
-    if (strFeatureName == "right")        return RIGHT_FLAG;
-    if (strFeatureName == "left")         return LEFT_FLAG;
+    if (strFeatureName == "a")
+      return A_FLAG;
+    if (strFeatureName == "b")
+      return B_FLAG;
+    if (strFeatureName == "x")
+      return X_FLAG;
+    if (strFeatureName == "y")
+      return Y_FLAG;
+    if (strFeatureName == "start")
+      return PLAY_FLAG;
+    if (strFeatureName == "back")
+      return BACK_FLAG;
+    if (strFeatureName == "guide")
+      return SPECIAL_FLAG;
+    if (strFeatureName == "leftbumper")
+      return LB_FLAG;
+    if (strFeatureName == "rightbumper")
+      return RB_FLAG;
+    if (strFeatureName == "leftthumb")
+      return LS_CLK_FLAG;
+    if (strFeatureName == "rightthumb")
+      return RS_CLK_FLAG;
+    if (strFeatureName == "up")
+      return UP_FLAG;
+    if (strFeatureName == "down")
+      return DOWN_FLAG;
+    if (strFeatureName == "right")
+      return RIGHT_FLAG;
+    if (strFeatureName == "left")
+      return LEFT_FLAG;
   }
   return -1;
 }
@@ -87,57 +102,65 @@ bool CInputManager::InputEvent(unsigned int port, const game_input_event& event)
   const std::string strControllerId = event.controller_id;
   const std::string strFeatureName = event.feature_name;
 
-  if(!m_port_opened) {
-	return false;
+  if (!m_port_opened)
+  {
+    return false;
   }
 
   switch (event.type)
   {
-  case GAME_INPUT_EVENT_DIGITAL_BUTTON: {
-	  int index = GetIndex(strControllerId, strFeatureName);
-	  if (event.digital_button.pressed)
-		  m_state.button |= index;
-	  else
-		  m_state.button &= ~index;
-	  break;
+    case GAME_INPUT_EVENT_DIGITAL_BUTTON:
+      {
+      int index = GetIndex(strControllerId, strFeatureName);
+      if (event.digital_button.pressed)
+        m_state.button |= index;
+      else
+        m_state.button &= ~index;
+      break;
+    }
+    case GAME_INPUT_EVENT_ANALOG_BUTTON:
+      if (strFeatureName == "lefttrigger")
+      {
+        m_state.leftTrigger = (unsigned char) (event.analog_button.magnitude * UCHAR_MAX);
+      }
+      if (strFeatureName == "righttrigger")
+      {
+        m_state.rightTrigger = (unsigned char) (event.analog_button.magnitude * UCHAR_MAX);
+      }
+      break;
+    case GAME_INPUT_EVENT_ANALOG_STICK:
+      {
+      short int x = (short int) (event.analog_stick.x * SHRT_MAX);
+      short int y = (short int) (event.analog_stick.y * SHRT_MAX);
+      isyslog("Analog button (%f, %f) (%i, %i)", event.analog_stick.x, event.analog_stick.y, x, y);
+      if (strFeatureName == "leftstick")
+      {
+        m_state.leftStickX = x;
+        m_state.leftStickY = y;
+      }
+      else if (strFeatureName == "rightstick")
+      {
+        m_state.rightStickX = x;
+        m_state.rightStickY = y;
+      }
+      break;
+    }
+    case GAME_INPUT_EVENT_ACCELEROMETER:
+      break;
+
+    case GAME_INPUT_EVENT_KEY:
+      break;
+
+    case GAME_INPUT_EVENT_RELATIVE_POINTER:
+      break;
+
+    case GAME_INPUT_EVENT_ABSOLUTE_POINTER:
+      break;
+
+    default:
+      break;
   }
-  case GAME_INPUT_EVENT_ANALOG_BUTTON:
-	  if (strFeatureName == "lefttrigger") {
-		  m_state.leftTrigger = (unsigned char)(event.analog_button.magnitude * UCHAR_MAX);
-	  }
-	  if (strFeatureName == "righttrigger") {
-		  m_state.rightTrigger = (unsigned char)(event.analog_button.magnitude * UCHAR_MAX);
-	  }
-	  break;
-  case GAME_INPUT_EVENT_ANALOG_STICK: {
-	  short int x = (short int)(event.analog_stick.x * SHRT_MAX);
-	  short int y = (short int)(event.analog_stick.y * SHRT_MAX);
-	  isyslog("Analog button (%f, %f) (%i, %i)", event.analog_stick.x, event.analog_stick.y, x, y);
-	  if (strFeatureName == "leftstick") {
-		  m_state.leftStickX = x;
-		  m_state.leftStickY = y;
-	  }
-	  else if (strFeatureName == "rightstick"){
-		  m_state.rightStickX = x;
-		  m_state.rightStickY = y;
-	  }
-	  break;
-  }
-  case GAME_INPUT_EVENT_ACCELEROMETER:
-	  break;
-
-  case GAME_INPUT_EVENT_KEY:
-	  break;
-
-  case GAME_INPUT_EVENT_RELATIVE_POINTER:
-	  break;
-
-  case GAME_INPUT_EVENT_ABSOLUTE_POINTER:
-	  break;
-
-  default:
-	  break;
-  }
-  LiSendControllerEvent(m_state.button, m_state.leftTrigger, m_state.rightTrigger, m_state.leftStickX, m_state.leftStickY, m_state.rightStickX, m_state.rightStickY);
+  LiSendControllerEvent(m_state.button, m_state.leftTrigger, m_state.rightTrigger, m_state.leftStickX,
+      m_state.leftStickY, m_state.rightStickX, m_state.rightStickY);
   return true;
 }

@@ -47,8 +47,8 @@ namespace MOONLIGHT
     std::string m_cert_path;
     std::string m_pkey_path;
     std::string m_p12_path;
-    X509*     m_x509;
+    X509* m_x509;
     EVP_PKEY* m_pkey;
-    PKCS12*   m_p12;
+    PKCS12* m_p12;
   };
 }

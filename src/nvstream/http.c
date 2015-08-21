@@ -30,27 +30,29 @@ static const char *pKeyFile = "./key.pem";
 static size_t _write_curl(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
-  struct http_data *mem = (struct http_data *)userp;
- 
+  struct http_data *mem = (struct http_data *) userp;
+
   mem->memory = realloc(mem->memory, mem->size + realsize + 1);
-  if(mem->memory == NULL) {
+  if (mem->memory == NULL)
+  {
     fprintf(stderr, "Not enough memory\n");
     exit(EXIT_FAILURE);
   }
- 
+
   memcpy(&(mem->memory[mem->size]), contents, realsize);
   mem->size += realsize;
   mem->memory[mem->size] = 0;
- 
+
   return realsize;
 }
 
-void http_init() {
+void http_init()
+{
   curl = curl_easy_init();
-  
+
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
   curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L);
-  curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE,"PEM");
+  curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
   curl_easy_setopt(curl, CURLOPT_SSLCERT, pCertFile);
   curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
   curl_easy_setopt(curl, CURLOPT_SSLKEY, pKeyFile);
@@ -59,37 +61,44 @@ void http_init() {
   curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
 }
 
-int http_request(char* url, struct http_data* data, int timeout) {
+int http_request(char* url, struct http_data* data, int timeout)
+{
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
 
-  if (data->size > 0) {
+  if (data->size > 0)
+  {
     free(data->memory);
     data->memory = malloc(1);
-    if(data->memory == NULL) {
+    if (data->memory == NULL)
+    {
       fprintf(stderr, "Not enough memory\n");
       exit(EXIT_FAILURE);
     }
     data->size = 0;
   }
   CURLcode res = curl_easy_perform(curl);
-  
-  if(res != CURLE_OK) {
+
+  if (res != CURLE_OK)
+  {
     fprintf(stderr, "Connection failed: %s\n", curl_easy_strerror(res));
   }
-  
+
   return res;
 }
 
-void http_cleanup() {
+void http_cleanup()
+{
   curl_easy_cleanup(curl);
 }
 
-struct http_data* http_create_data() {
+struct http_data* http_create_data()
+{
   struct http_data* data = malloc(sizeof(struct http_data));
   data->memory = malloc(1);
-  if(data->memory == NULL) {
+  if (data->memory == NULL)
+  {
     fprintf(stderr, "Not enough memory\n");
     exit(EXIT_FAILURE);
   }
@@ -98,7 +107,8 @@ struct http_data* http_create_data() {
   return data;
 }
 
-void http_free_data(struct http_data* data) {
+void http_free_data(struct http_data* data)
+{
   free(data->memory);
   free(data);
 }

@@ -27,7 +27,7 @@
 using namespace MOONLIGHT;
 
 CLogAddon::CLogAddon(ADDON::CHelper_libXBMC_addon* frontend)
- : m_frontend(frontend)
+    : m_frontend(frontend)
 {
   ASSERT(m_frontend);
 }
@@ -38,17 +38,17 @@ void CLogAddon::Log(SYS_LOG_LEVEL level, const char* logline)
 
   switch (level)
   {
-  case SYS_LOG_ERROR:
-    loglevel = ADDON::LOG_ERROR;
-    break;
-  case SYS_LOG_INFO:
-    loglevel = ADDON::LOG_INFO;
-    break;
-  case SYS_LOG_DEBUG:
-    loglevel = ADDON::LOG_DEBUG;
-    break;
-  default:
-    return;
+    case SYS_LOG_ERROR:
+      loglevel = ADDON::LOG_ERROR;
+      break;
+    case SYS_LOG_INFO:
+      loglevel = ADDON::LOG_INFO;
+      break;
+    case SYS_LOG_DEBUG:
+      loglevel = ADDON::LOG_DEBUG;
+      break;
+    default:
+      return;
   }
 
   if (m_frontend)

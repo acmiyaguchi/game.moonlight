@@ -165,7 +165,7 @@ PairState PairingManager::pair(std::string uid, std::string pin)
   //TODO: concat challenge_data, m_cert->signature->data (256), server_secret
   std::vector<unsigned char> server_challenge_resp_hash;
   //if (server_challenge_resp_hash != server_response)
-  if(false)
+  if (false)
   {
     url << m_http->baseUrlHttps << "/unpair?uniqueid=" << uid;
     m_http->openHttpConnection(url.str(), true);
@@ -225,16 +225,17 @@ std::string PairingManager::bytesToHex(unsigned char* in, unsigned len)
   return ss.str();
 }
 
-namespace {
-int char2int(char input)
+namespace
 {
-  if(input >= '0' && input <= '9')
-    return input - '0';
-  if(input >= 'A' && input <= 'F')
-    return input - 'A' + 10;
-  if(input >= 'a' && input <= 'f')
-    return input - 'a' + 10;
-}
+  int char2int(char input)
+  {
+    if (input >= '0' && input <= '9')
+      return input - '0';
+    if (input >= 'A' && input <= 'F')
+      return input - 'A' + 10;
+    if (input >= 'a' && input <= 'f')
+      return input - 'a' + 10;
+  }
 }
 
 std::vector<unsigned char> PairingManager::hexToBytes(std::string s)
@@ -331,7 +332,8 @@ std::string PairingManager::generatePinString()
 {
   srand(time(NULL));
   std::stringstream ss;
-  for (int i=0; i < 4; i++) {
+  for (int i = 0; i < 4; i++)
+  {
     ss << rand() % 10;
   }
   return ss.str();

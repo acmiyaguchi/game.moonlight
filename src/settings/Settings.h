@@ -27,23 +27,41 @@ namespace MOONLIGHT
   class Settings
   {
   public:
-	static Settings& Get();
+    static Settings& Get();
 
     void SetSetting(const std::string& strName, const void* value);
 
     virtual ~Settings();
 
-    bool isInitialized() { return m_initialized; }
+    bool isInitialized()
+    {
+      return m_initialized;
+    }
 
-    std::string getHost() const { return m_host; }
+    std::string getHost() const
+    {
+      return m_host;
+    }
 
-    Resolution getResolution() const { return *m_resolution; }
+    Resolution getResolution() const
+    {
+      return *m_resolution;
+    }
 
-    bool getFullscreen() const { return m_fullscreen; }
+    bool getFullscreen() const
+    {
+      return m_fullscreen;
+    }
 
-    bool getLocalAudio() const { return m_localaudio; }
+    bool getLocalAudio() const
+    {
+      return m_localaudio;
+    }
 
-    const std::string getUniqueId() const { return m_uid; }
+    const std::string getUniqueId() const
+    {
+      return m_uid;
+    }
 
   private:
     Settings();

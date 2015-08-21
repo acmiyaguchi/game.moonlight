@@ -53,11 +53,11 @@ namespace MOONLIGHT
     bool quitApp();
     bool resumeApp(STREAM_CONFIGURATION* config);
     void unpair();
-  private:
+    private:
     void initializeConfig(STREAM_CONFIGURATION* config);
     std::vector<NvApp> getAppList(std::string input);
     PairingManager* m_pm;
-    CertKeyPair*    m_cert;
-    std::string     m_uid;
+    CertKeyPair* m_cert;
+    std::string m_uid;
   };
 }

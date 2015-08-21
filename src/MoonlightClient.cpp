@@ -31,25 +31,27 @@
 using namespace MOONLIGHT;
 
 CMoonlightClient::CMoonlightClient()
-  : m_http(NULL)
+    : m_http(NULL)
 {
 }
 
 MOONLIGHT::CMoonlightClient::~CMoonlightClient()
 {
-  if(m_http)
+  if (m_http)
     delete m_http;
 }
 
 bool CMoonlightClient::init()
 {
-  if (!Settings::Get().isInitialized()) {
-	  esyslog("CMoonlightClient::init: Settings are not initialized.");
-	  return false;
+  if (!Settings::Get().isInitialized())
+  {
+    esyslog("CMoonlightClient::init: Settings are not initialized.");
+    return false;
   }
   m_host = Settings::Get().getHost();
-  if(!m_http) {
-	  m_http = new NvHTTP(m_host.c_str(), Settings::Get().getUniqueId());
+  if (!m_http)
+  {
+    m_http = new NvHTTP(m_host.c_str(), Settings::Get().getUniqueId());
   }
   return true;
 }
@@ -71,7 +73,8 @@ bool CMoonlightClient::start()
   isyslog("CMoonlightClient::start: Starting moonlight");
 
   std::vector<NvApp> appList = m_http->getAppList();
-  if(appList.empty()) {
+  if (appList.empty())
+  {
     esyslog("Empty Application list");
     return false;
   }
@@ -81,21 +84,25 @@ bool CMoonlightClient::start()
 
   isyslog("CMoonlightClient::start: Launching app %s", app.getAppName().c_str());
   isyslog("Starting with settings:\nhost: %s\nwidth: %i\nheight: %i\nfps: %i\nbitrate: %i",
-		  m_host.c_str(), config.width, config.height, config.fps, config.bitrate);
+      m_host.c_str(), config.width, config.height, config.fps, config.bitrate);
   bool localAudio = !Settings::Get().getLocalAudio();
   bool launched = m_http->launchApp(&config, app.getAppId(), false, localAudio);
   int num_retries = 5;
-  if(!launched) {
-	  for(int i = 0; i < num_retries; i++) {
-		  isyslog("CMoonlightClient::start: retrying launch...");
-		  launched = m_http->launchApp(&config, app.getAppId(), false, localAudio);
-		  if (launched) {
-			  break;
-		  }
-	  }
-	  if(!launched) {
-		  return false;
-	  }
+  if (!launched)
+  {
+    for (int i = 0; i < num_retries; i++)
+    {
+      isyslog("CMoonlightClient::start: retrying launch...");
+      launched = m_http->launchApp(&config, app.getAppId(), false, localAudio);
+      if (launched)
+      {
+        break;
+      }
+    }
+    if (!launched)
+    {
+      return false;
+    }
   }
 
   LiStartConnection(m_host.c_str(), &config, &conn_cb, &video_cb, &audio_cb, NULL, 0, 0);
@@ -112,14 +119,16 @@ void CMoonlightClient::stop()
 bool CMoonlightClient::pair()
 {
   std::string serverInfo = m_http->getServerInfo(Settings::Get().getUniqueId());
-  if(serverInfo.empty()) {
-	  return false;
+  if (serverInfo.empty())
+  {
+    return false;
   }
   if (m_http->getPairState(serverInfo) == PairState::PAIRED)
   {
-     isyslog("Already paired");
+    isyslog("Already paired");
   }
-  else if (m_http->getCurrentGame(serverInfo) != 0) {
+  else if (m_http->getCurrentGame(serverInfo) != 0)
+  {
     isyslog("Computer is currently in a game. You must close the game before pairing.");
     return false;
   }
@@ -131,15 +140,15 @@ bool CMoonlightClient::pair()
     PairState pair_state = m_http->pair(pin);
     switch (pair_state)
     {
-    case PairState::PIN_WRONG:
-      esyslog("Incorrect PIN");
-      return false;
-    case PairState::FAILED:
-      esyslog("Pairing failed");
-      return false;
-    case PairState::PAIRED:
-      isyslog("Paired successfully");
-      break;
+      case PairState::PIN_WRONG:
+        esyslog("Incorrect PIN");
+        return false;
+      case PairState::FAILED:
+        esyslog("Pairing failed");
+        return false;
+      case PairState::PAIRED:
+        isyslog("Paired successfully");
+        break;
     }
   }
 

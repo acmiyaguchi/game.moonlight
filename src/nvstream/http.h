@@ -19,21 +19,23 @@
 #pragma once
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #include <stdlib.h>
 
-struct http_data {
-  char *memory;
-  size_t size;
-};
+  struct http_data
+  {
+    char *memory;
+    size_t size;
+  };
 
-void http_init();
-int http_request(char* url, struct http_data* data, int timeout);
+  void http_init();
+  int http_request(char* url, struct http_data* data, int timeout);
 
-struct http_data* http_create_data();
-void http_free_data(struct http_data* data);
+  struct http_data* http_create_data();
+  void http_free_data(struct http_data* data);
 
 #ifdef __cplusplus
 }

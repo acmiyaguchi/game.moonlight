@@ -59,8 +59,8 @@ namespace MOONLIGHT
     static const char* LevelToString(SYS_LOG_LEVEL level);
 
   private:
-    ILog*            m_pipe;
-    SYS_LOG_LEVEL    m_level;
+    ILog* m_pipe;
+    SYS_LOG_LEVEL m_level;
     PLATFORM::CMutex m_mutex;
   };
 }

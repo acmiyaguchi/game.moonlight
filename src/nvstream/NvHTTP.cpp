@@ -40,8 +40,8 @@ namespace
   const int CONNECTION_TIMEOUT = 5;
 }
 
-NvHTTP::NvHTTP(const char* host, std::string uid) :
-  m_uid(uid)
+NvHTTP::NvHTTP(const char* host, std::string uid)
+    : m_uid(uid)
 {
   std::stringstream ss;
   ss << "https://" << host << ":" << HTTPS_PORT;
@@ -65,14 +65,16 @@ NvHTTP::~NvHTTP()
 std::string NvHTTP::getXmlString(std::string str, std::string tagname)
 {
   pugi::xml_document doc;
-  pugi::xml_parse_result result = doc.load_buffer(str.c_str(),str.size(), pugi::parse_default, pugi::encoding_auto);
-  if(!result) {
+  pugi::xml_parse_result result = doc.load_buffer(str.c_str(), str.size(), pugi::parse_default, pugi::encoding_auto);
+  if (!result)
+  {
     esyslog("Did not properly load xml\n");
     return "";
   }
 
   pugi::xml_node node = doc.child("root").child(tagname.c_str());
-  if(node) {
+  if (node)
+  {
     isyslog("%s found with value %s", tagname.c_str(), node.child_value());
     return std::string(node.child_value());
   }
@@ -86,7 +88,8 @@ std::string NvHTTP::getServerInfo(std::string uid)
   url << baseUrlHttps << "/serverinfo?uniqueid=" << m_uid;
 
   std::string resp = openHttpConnection(url.str(), true);
-  if(resp.empty()) {
+  if (resp.empty())
+  {
     url.str("");
     url << baseUrlHttp << "/serverinfo";
     resp = openHttpConnection(url.str(), true);
@@ -133,13 +136,15 @@ std::string NvHTTP::openHttpConnection(std::string url, bool enableTimeout)
   isyslog("Opening connection to %s", url.c_str());
   std::stringstream ss;
   int timeout = 0;
-  if(enableTimeout) {
-	  timeout = CONNECTION_TIMEOUT;
+  if (enableTimeout)
+  {
+    timeout = CONNECTION_TIMEOUT;
   }
   http_data* data = http_create_data();
-  if(http_request((char*)url.c_str(), data, timeout) != 0) {
-	  http_free_data(data);
-	  return std::string("");
+  if (http_request((char*) url.c_str(), data, timeout) != 0)
+  {
+    http_free_data(data);
+    return std::string("");
   }
   ss.write(data->memory, data->size);
   http_free_data(data);
@@ -167,10 +172,10 @@ bool MOONLIGHT::NvHTTP::launchApp(STREAM_CONFIGURATION* config, int appId, bool 
   url << baseUrlHttps << "/launch?uniqueid=" << m_uid
       << "&appid=" << appId
       << "&mode=" << config->width << "x" << config->height << "x" << config->fps
-      << "&additionalStates=1&sops=" << (int)sops
-      << "&rikey=" << m_pm->bytesToHex((unsigned char*)config->remoteInputAesKey, 16)
+      << "&additionalStates=1&sops=" << (int) sops
+      << "&rikey=" << m_pm->bytesToHex((unsigned char*) config->remoteInputAesKey, 16)
       << "&rikeyid=" << rikey
-      << "&localAudioPlayMode=" << (int)localaudio;
+      << "&localAudioPlayMode=" << (int) localaudio;
   std::string resp = openHttpConnection(url.str(), true);
   return !resp.empty();
 }
@@ -181,14 +186,14 @@ bool MOONLIGHT::NvHTTP::resumeApp(STREAM_CONFIGURATION* config)
   uint32_t rikey = 1;
   std::stringstream url;
   url << baseUrlHttps << "/resume?uniqueid=" << m_uid
-      << "&rikey=" << m_pm->bytesToHex((unsigned char*)config->remoteInputAesKey, 16)
+      << "&rikey=" << m_pm->bytesToHex((unsigned char*) config->remoteInputAesKey, 16)
       << "&rikeyid=" << rikey;
   std::string resp = openHttpConnection(url.str(), false);
 }
 
 void MOONLIGHT::NvHTTP::initializeConfig(STREAM_CONFIGURATION* config)
 {
-  RAND_bytes((unsigned char*)config->remoteInputAesKey, 16);
+  RAND_bytes((unsigned char*) config->remoteInputAesKey, 16);
   memset(config->remoteInputAesIv, 0, 16);
 }
 
@@ -196,14 +201,17 @@ std::vector<NvApp> MOONLIGHT::NvHTTP::getAppList(std::string input)
 {
   std::vector<NvApp> appList;
   pugi::xml_document doc;
-  pugi::xml_parse_result result = doc.load_buffer(input.c_str(), input.size(), pugi::parse_default, pugi::encoding_auto);
-  if(!result) {
+  pugi::xml_parse_result result = doc.load_buffer(input.c_str(), input.size(), pugi::parse_default,
+      pugi::encoding_auto);
+  if (!result)
+  {
     esyslog("Did not properly load xml\n");
     return appList;
   }
 
   pugi::xml_node node = doc.child("root").child("App");
-  for(; node; node = node.next_sibling()) {
+  for (; node; node = node.next_sibling())
+  {
     isyslog("App Found: %s", node.child_value("AppTitle"));
     std::string title = node.child_value("AppTitle");
     std::string id = node.child_value("ID");
@@ -216,7 +224,6 @@ std::vector<NvApp> MOONLIGHT::NvHTTP::getAppList(std::string input)
 
   return appList;
 }
-
 
 bool MOONLIGHT::NvHTTP::quitApp()
 {

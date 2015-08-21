@@ -28,16 +28,18 @@
 
 using namespace MOONLIGHT;
 
-int main() {
+int main()
+{
   std::string host = "10.0.0.7";
   CMoonlightClient client;
   bool res = client.pair();
-  if(!res) {
+  if (!res)
+  {
     std::cout << "Error pairing" << std::endl;
     return -1;
   }
   client.start();
-  std::thread delay (sleep, 5);
+  std::thread delay(sleep, 5);
   delay.join();
   client.stop();
   return 0;

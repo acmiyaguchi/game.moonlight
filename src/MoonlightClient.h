@@ -35,7 +35,7 @@ namespace MOONLIGHT
     bool start();
     void stop();
     bool pair();
-  private:
+    private:
     std::string m_host;
     NvHTTP* m_http;
   };

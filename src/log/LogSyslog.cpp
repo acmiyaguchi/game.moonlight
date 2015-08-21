@@ -41,17 +41,17 @@ void CLogSyslog::Log(SYS_LOG_LEVEL level, const char* logline)
   int priority = LOG_ERR;
   switch (level)
   {
-  case SYS_LOG_ERROR:
-    priority = LOG_ERR;
-    break;
-  case SYS_LOG_INFO:
-    priority = LOG_INFO;
-    break;
-  case SYS_LOG_DEBUG:
-    priority = LOG_DEBUG;
-    break;
-  default:
-    return;
+    case SYS_LOG_ERROR:
+      priority = LOG_ERR;
+      break;
+    case SYS_LOG_INFO:
+      priority = LOG_INFO;
+      break;
+    case SYS_LOG_DEBUG:
+      priority = LOG_DEBUG;
+      break;
+    default:
+      return;
   }
   syslog(priority, "%s", logline);
 }

@@ -24,26 +24,31 @@ void audio_renderer_setup()
 
 void audio_renderer_cleanup()
 {
-  if (m_decoder) {
-	opus_decoder_destroy(m_decoder);
-	m_decoder = NULL;
+  if (m_decoder)
+  {
+    opus_decoder_destroy(m_decoder);
+    m_decoder = NULL;
   }
 }
 
 void audio_renderer_decode_and_play_sample(char* sampleData, int sampleLength)
 {
-  int decodeLen = opus_decode(m_decoder, (const unsigned char*)sampleData, sampleLength, pcmBuffer, FRAME_SIZE, 0);
-  if (decodeLen > 0) {
-    frontend->AudioFrames((uint8_t*)pcmBuffer, decodeLen*CHANNEL_COUNT*sizeof(short), decodeLen, GAME_AUDIO_FMT_S16NE);
+  int decodeLen = opus_decode(m_decoder, (const unsigned char*) sampleData, sampleLength, pcmBuffer, FRAME_SIZE, 0);
+  if (decodeLen > 0)
+  {
+    frontend->AudioFrames((uint8_t*) pcmBuffer, decodeLen * CHANNEL_COUNT * sizeof(short), decodeLen,
+        GAME_AUDIO_FMT_S16NE);
   }
-  else {
-	esyslog("Opus decode error: %d", decodeLen);
+  else
+  {
+    esyslog("Opus decode error: %d", decodeLen);
   }
 }
 
 AUDIO_RENDERER_CALLBACKS MOONLIGHT::getAudioCallbacks()
 {
-  AUDIO_RENDERER_CALLBACKS callbacks = {
+  AUDIO_RENDERER_CALLBACKS callbacks =
+  {
       audio_renderer_setup,
       audio_renderer_cleanup,
       audio_renderer_decode_and_play_sample

@@ -26,13 +26,18 @@
 
 namespace MOONLIGHT
 {
-  class CLogConsole : public ILog
+  class CLogConsole: public ILog
   {
   public:
-    virtual ~CLogConsole(void) { }
+    virtual ~CLogConsole(void)
+    {
+    }
 
     virtual void Log(SYS_LOG_LEVEL level, const char* logline);
-    virtual SYS_LOG_TYPE Type(void) const { return SYS_LOG_TYPE_CONSOLE; }
+    virtual SYS_LOG_TYPE Type(void) const
+        {
+      return SYS_LOG_TYPE_CONSOLE;
+    }
 
   private:
     PLATFORM::CMutex m_mutex;

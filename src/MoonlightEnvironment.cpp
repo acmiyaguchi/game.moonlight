@@ -26,9 +26,8 @@
 using namespace ADDON;
 using namespace MOONLIGHT;
 
-
 CMoonlightEnvironment::CMoonlightEnvironment(void)
-  : m_kodi(NULL), m_frontend(NULL), m_client(NULL)
+    : m_kodi(NULL), m_frontend(NULL), m_client(NULL)
 {
 }
 
@@ -38,7 +37,8 @@ CMoonlightEnvironment& CMoonlightEnvironment::Get(void)
   return _instance;
 }
 
-void CMoonlightEnvironment::Initialize(CHelper_libXBMC_addon* kodi, CHelper_libKODI_game* frontend, CMoonlightClient* client)
+void CMoonlightEnvironment::Initialize(CHelper_libXBMC_addon* kodi, CHelper_libKODI_game* frontend,
+    CMoonlightClient* client)
 {
   m_kodi = kodi;
   m_frontend = frontend;

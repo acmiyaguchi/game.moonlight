@@ -24,7 +24,7 @@
 using namespace MOONLIGHT;
 
 MOONLIGHT::NvApp::NvApp(std::string name)
-  : m_name(name)
+    : m_name(name)
 {
   m_id = -1;
   m_running = false;
@@ -32,7 +32,7 @@ MOONLIGHT::NvApp::NvApp(std::string name)
 }
 
 MOONLIGHT::NvApp::NvApp(std::string name, int id)
-  : m_name(name), m_id(id)
+    : m_name(name), m_id(id)
 {
   m_running = false;
   m_initialized = true;
@@ -45,10 +45,12 @@ void MOONLIGHT::NvApp::setAppName(std::string name)
 
 void MOONLIGHT::NvApp::setAppId(std::string id)
 {
-  try {
+  try
+  {
     m_id = std::stoi(id);
     m_initialized = true;
-  } catch (const std::exception &e) {
+  } catch (const std::exception &e)
+  {
     esyslog("NvApp::setAppId: invalid conversion of %s to integer", id.c_str());
   }
 }

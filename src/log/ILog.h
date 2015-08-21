@@ -41,7 +41,9 @@ namespace MOONLIGHT
   class ILog
   {
   public:
-    virtual ~ILog(void) { }
+    virtual ~ILog(void)
+    {
+    }
 
     virtual void Log(SYS_LOG_LEVEL level, const char* logline) = 0;
 

@@ -34,18 +34,18 @@ using namespace MOONLIGHT;
 
 namespace
 {
-	const int NUM_BITS =  2048;
-  const int SERIAL =    0;
+  const int NUM_BITS = 2048;
+  const int SERIAL = 0;
   const int NUM_YEARS = 10;
 }
 
 CertKeyPair::CertKeyPair(std::string certFile, std::string p12File, std::string keyPairFile)
-  : m_cert_path(certFile), m_p12_path(p12File), m_pkey_path(keyPairFile)
+    : m_cert_path(certFile), m_p12_path(p12File), m_pkey_path(keyPairFile)
 {
-	m_x509 = NULL;
-	m_pkey = NULL;
-	m_p12 = NULL;
-	this->loadCert();
+  m_x509 = NULL;
+  m_pkey = NULL;
+  m_p12 = NULL;
+  this->loadCert();
 }
 
 CertKeyPair::~CertKeyPair()
@@ -68,22 +68,24 @@ bool CertKeyPair::generate()
   SSLeay_add_all_algorithms();
   ERR_load_crypto_strings();
 
-  if (!make_cert(NUM_BITS, SERIAL, NUM_YEARS)){
+  if (!make_cert(NUM_BITS, SERIAL, NUM_YEARS))
+  {
     return false;
   }
 
-  m_p12 = PKCS12_create((char*)"limelight", (char*)"GameStream", m_pkey, m_x509, NULL, 0, 0, 0, 0, 0);
-  if (m_p12 == NULL) {
+  m_p12 = PKCS12_create((char*) "limelight", (char*) "GameStream", m_pkey, m_x509, NULL, 0, 0, 0, 0, 0);
+  if (m_p12 == NULL)
+  {
     esyslog("Error generating a valid PKCS12 certificate.\n");
   }
 
-  #ifndef OPENSSL_NO_ENGINE
-    ENGINE_cleanup();
-  #endif
-    CRYPTO_cleanup_all_ex_data();
+#ifndef OPENSSL_NO_ENGINE
+  ENGINE_cleanup();
+#endif
+  CRYPTO_cleanup_all_ex_data();
 
-    CRYPTO_mem_leaks(bio_err);
-    BIO_free(bio_err);
+  CRYPTO_mem_leaks(bio_err);
+  BIO_free(bio_err);
 
   return true;
 }
@@ -102,7 +104,7 @@ void CertKeyPair::save(std::string certFile, std::string p12File, std::string ke
   PEM_write_X509(certFilePtr, m_x509);
   PEM_write_PrivateKey(keyPairFilePtr, m_pkey, NULL, NULL, 0, NULL, NULL);
   i2d_PKCS12_fp(p12FilePtr, m_p12);
-  
+
   fclose(certFilePtr);
   fclose(keyPairFilePtr);
   fclose(p12FilePtr);
@@ -116,39 +118,45 @@ bool CertKeyPair::make_cert(int bits, int serial, int years)
   RSA* rsa;
   X509_NAME* name = NULL;
 
-  if (m_pkey == NULL) {
-    if ((pk=EVP_PKEY_new()) == NULL) {
+  if (m_pkey == NULL)
+  {
+    if ((pk = EVP_PKEY_new()) == NULL)
+    {
       return false;
     }
   }
-  else {
+  else
+  {
     pk = m_pkey;
   }
 
-  if (m_x509 == NULL) {
-    if ((x = X509_new()) == NULL) {
+  if (m_x509 == NULL)
+  {
+    if ((x = X509_new()) == NULL)
+    {
       return false;
     }
   }
-  else {
+  else
+  {
     x = m_x509;
   }
 
-
   rsa = RSA_generate_key(bits, RSA_F4, NULL, NULL);
-  if (!EVP_PKEY_assign_RSA(pk, rsa)) {
+  if (!EVP_PKEY_assign_RSA(pk, rsa))
+  {
     return false;
   }
 
   X509_set_version(x, 2);
   ASN1_INTEGER_set(X509_get_serialNumber(x), serial);
   X509_gmtime_adj(X509_get_notBefore(x), 0);
-  X509_gmtime_adj(X509_get_notAfter(x), (long)3600*24*365*years);
+  X509_gmtime_adj(X509_get_notAfter(x), (long) 3600 * 24 * 365 * years);
   X509_set_pubkey(x, pk);
 
   name = X509_get_subject_name(x);
 
-  X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (unsigned char*)"NVIDIA GameStream Client", -1, -1, 0);
+  X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (unsigned char*) "NVIDIA GameStream Client", -1, -1, 0);
   X509_set_issuer_name(x, name);
 
   // add various extensions
@@ -156,7 +164,8 @@ bool CertKeyPair::make_cert(int bits, int serial, int years)
   add_extension(x, NID_key_usage, "critical,keyCertSign,cRLSign");
   add_extension(x, NID_subject_key_identifier, "hash");
 
-  if (!X509_sign(x, pk, EVP_sha1())) {
+  if (!X509_sign(x, pk, EVP_sha1()))
+  {
     return false;
   }
 
@@ -172,15 +181,16 @@ bool CertKeyPair::add_extension(X509* cert, int nid, const char* value)
   X509V3_CTX ctx;
   X509V3_set_ctx_nodb(&ctx);
   X509V3_set_ctx(&ctx, cert, cert, NULL, NULL, 0);
-  
-  ext = X509V3_EXT_conf_nid(NULL, &ctx, nid, (char*)value);
-  if (!ext) {
+
+  ext = X509V3_EXT_conf_nid(NULL, &ctx, nid, (char*) value);
+  if (!ext)
+  {
     return false;
   }
 
   X509_add_ext(cert, ext, -1);
   X509_EXTENSION_free(ext);
-  
+
   return true;
 }
 
@@ -210,11 +220,12 @@ std::vector<unsigned char> CertKeyPair::getCertBytes(std::string certFile)
   std::ifstream file(certFile);
   file.seekg(0, std::ios::end);
   std::streampos length(file.tellg());
-  if(length) {
+  if (length)
+  {
     size_t size = static_cast<size_t>(length);
     file.seekg(0, std::ios::beg);
     vec.resize(size);
-    file.read((char*)(&vec[0]), size);
+    file.read((char*) (&vec[0]), size);
   }
   return vec;
 }

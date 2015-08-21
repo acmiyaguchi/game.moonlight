@@ -20,38 +20,38 @@
 #pragma once
 
 #if !defined(ASSERT)
-  #if defined(DEBUG) || defined(_DEBUG)
-    #include <assert.h>
-    #define ASSERT(x)  assert(x)
-  #else
-    #define ASSERT(x)
-  #endif
+#if defined(DEBUG) || defined(_DEBUG)
+#include <assert.h>
+#define ASSERT(x)  assert(x)
+#else
+#define ASSERT(x)
+#endif
 #endif
 
 #if !defined(SAFE_DELETE)
-  #define SAFE_DELETE(x)  do { delete (x); (x) = NULL; } while (0)
+#define SAFE_DELETE(x)  do { delete (x); (x) = NULL; } while (0)
 #endif
 
 #if !defined(SAFE_DELETE_ARRAY)
-  #define SAFE_DELETE_ARRAY(x)  do { delete[] (x); (x) = NULL; } while (0)
+#define SAFE_DELETE_ARRAY(x)  do { delete[] (x); (x) = NULL; } while (0)
 #endif
 
 #if !defined(SAFE_RELEASE)
-  #define SAFE_RELEASE(p)  do { if(p) { (p)->Release(); (p)=NULL; } } while (0)
+#define SAFE_RELEASE(p)  do { if(p) { (p)->Release(); (p)=NULL; } } while (0)
 #endif
 
 #ifndef CONSTRAIN
-  #define CONSTRAIN(min, value, max)  ((value) < (min) ? (min) : (max) < (value) ? (max) : (value))
+#define CONSTRAIN(min, value, max)  ((value) < (min) ? (min) : (max) < (value) ? (max) : (value))
 #endif
 
 #ifndef ARRAY_SIZE
-  #define ARRAY_SIZE(x)  (sizeof(x) / sizeof((x)[0]))
+#define ARRAY_SIZE(x)  (sizeof(x) / sizeof((x)[0]))
 #endif
 
 #ifndef MIN
-  #define MIN(x, y)  ((y) < (x) ? (y) : (x))
+#define MIN(x, y)  ((y) < (x) ? (y) : (x))
 #endif
 
 #ifndef MAX
-  #define MAX(x, y)  ((y) > (x) ? (y) : (x))
+#define MAX(x, y)  ((y) > (x) ? (y) : (x))
 #endif

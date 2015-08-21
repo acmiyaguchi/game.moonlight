@@ -37,7 +37,7 @@ namespace MOONLIGHT
     int getAppId() const;
     bool getIsRunning() const;
     bool isInitialized() const;
-  private:
+    private:
     std::string m_name;
     int m_id;
     bool m_running;
